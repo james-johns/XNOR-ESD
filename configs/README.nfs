@@ -1,0 +1,11 @@
+
+Rootfs over NFS
+--------------------
+
+To mount your Rootfs (from buildroot, or other source) over NFS, you will need to set 3 kernel parameters.
+
+Firstly, the kernel requires an IP address to access the NFS server (afterall, NFS is NETWORKED). The "ip=" kernel parameter allows the user to specify the system's network configuration on any network interface during boot. To configure the ip automatically, use ip=dhcp. Without setting ip, the kernel will be unable to access the network in order to load the rootfs over NFS.
+
+Secondly, you need to specify that the rootfs is located on an NFS server. This is done by setting 'root=/dev/nfs'. The kernel must be configured to support rootfs over NFS, or this will result in an 'unknown-device' error.
+
+Finally, you need to specify where the rootfs is located. This is done via the 'nfsroot=<NFS Server IP>:<Path/to/rootfs/on/server>'
