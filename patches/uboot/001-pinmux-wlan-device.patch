@@ -1,0 +1,17 @@
+--- board/isee/igep00x0/igep00x0.h	2014-07-14 17:16:45.000000000 +0000
++++ /tmp/igep00x0.h	2014-11-25 18:41:02.890682132 +0000
+@@ -131,6 +131,14 @@
+ 	MUX_VAL(CP(MMC1_DAT1),      (IEN  | PTU | EN  | M0)) /* MMC1_DAT1 */\
+ 	MUX_VAL(CP(MMC1_DAT2),      (IEN  | PTU | EN  | M0)) /* MMC1_DAT2 */\
+ 	MUX_VAL(CP(MMC1_DAT3),      (IEN  | PTU | EN  | M0)) /* MMC1_DAT3 */\
++	MUX_VAL(CP(MMC2_CLK),       (IDIS | PTU | EN  | M0)) /* MMC2_CLK */ \
++	MUX_VAL(CP(MMC2_CMD),       (IEN  | PTU | EN  | M0)) /* MMC2_CMD */ \
++	MUX_VAL(CP(MMC2_DAT0),      (IEN  | PTU | EN  | M0)) /* MMC2_DAT0 */\
++	MUX_VAL(CP(MMC2_DAT1),      (IEN  | PTU | EN  | M0)) /* MMC2_DAT1 */\
++	MUX_VAL(CP(MMC2_DAT2),      (IEN  | PTU | EN  | M0)) /* MMC2_DAT2 */\
++	MUX_VAL(CP(MMC2_DAT3),      (IEN  | PTU | EN  | M0)) /* MMC2_DAT3 */\
++	MUX_VAL(CP(CAM_HS),         (IDIS | PTD | DIS | M0)) /* GPIO_94 */\
++	MUX_VAL(CP(CAM_VS),         (IDIS | PTD | DIS | M0)) /* GPIO_95 */\
+ 	MUX_VAL(CP(UART3_TX_IRTX),  (IDIS | PTD | DIS | M0)) /* UART3_TX */\
+ 	MUX_VAL(CP(UART3_RX_IRRX),  (IEN  | PTD | DIS | M0)) /* UART3_RX */\
+ 	MUX_VAL(CP(I2C1_SCL),       (IEN  | PTU | EN  | M0)) /* I2C1_SCL */\
