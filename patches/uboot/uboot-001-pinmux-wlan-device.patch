@@ -1,5 +1,5 @@
---- board/isee/igep00x0/igep00x0.h	2014-07-14 17:16:45.000000000 +0000
-+++ /tmp/igep00x0.h	2014-11-25 18:41:02.890682132 +0000
+--- a/board/isee/igep00x0/igep00x0.h	2014-07-14 17:16:45.000000000 +0000
++++ b/board/isee/igep00x0/igep00x0.h	2014-11-25 18:41:02.890682132 +0000
 @@ -131,6 +131,14 @@
  	MUX_VAL(CP(MMC1_DAT1),      (IEN  | PTU | EN  | M0)) /* MMC1_DAT1 */\
  	MUX_VAL(CP(MMC1_DAT2),      (IEN  | PTU | EN  | M0)) /* MMC1_DAT2 */\
