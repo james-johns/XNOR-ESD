@@ -1,0 +1,27 @@
+
+Getting started
+----------------
+
+Buildroot
+----------------
+
+To begin, you will need to checkout the submodules for this repository.
+Run the following commands:
+    git submodule init
+    git submodule update
+
+This will initialise and checkout all submodules for the current branch. 
+From here, you can continue development as always, using an agreed upon version
+of each submodule.
+
+
+Directory structure
+------------------------
+
+	configs/       - contains configuration files for all components of the
+		       	 system
+	patches/       - Contains patches to be applied to packages within buildroot
+		       	 during build process
+	buildroot/     - Location of buildroot submodule. See above for how to
+		       	 checkout working copy.
+
