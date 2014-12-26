@@ -4,6 +4,7 @@ use CGI;
 
 ### Environment variable definitions
 $logfile='./gstreamer.log';
+$audio_base_path = "./";
 
 $remote_addr = "$ENV{REMOTE_ADDR}";
 if ($remote_addr eq "") {
@@ -12,11 +13,11 @@ if ($remote_addr eq "") {
 
 ### Functions
 
-# stream_audio_track(file_path, target_ip)
+# stream_audio_track(file_name, target_ip)
 # if file_path does not exist, will cause client to hang
 sub stream_audio_track
 {
-    my $file      = @_[0];
+    my $file      = $audio_base_path . @_[0];
     my $target_ip = @_[1];
     my $pid = 0;
     if (($pid = fork()) == 0) {
@@ -47,7 +48,7 @@ print "\nAPI key: $apikey<br />\n";
 print "Client IP: $remote_addr<br />\n";
 
 if ($apikey == 1234) {
-    my $pid = stream_audio_track("./test2.ogg", $remote_addr);
+    my $pid = stream_audio_track("test2.ogg", $remote_addr);
     if ($pid) {
 	print "\n\nAudio stream has begun<br />\n";
     } else {
