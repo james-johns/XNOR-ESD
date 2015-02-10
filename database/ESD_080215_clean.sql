@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `ESD` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `ESD`;
 -- MySQL dump 10.13  Distrib 5.5.40, for debian-linux-gnu (x86_64)
 --
 -- Host: 127.0.0.1    Database: ESD
@@ -43,10 +41,8 @@ CREATE TABLE `Client` (
 -- Dumping data for table `Client`
 --
 
-LOCK TABLES `Client` WRITE;
 /*!40000 ALTER TABLE `Client` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Client` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `KnowledgeLvl`
@@ -66,11 +62,9 @@ CREATE TABLE `KnowledgeLvl` (
 -- Dumping data for table `KnowledgeLvl`
 --
 
-LOCK TABLES `KnowledgeLvl` WRITE;
 /*!40000 ALTER TABLE `KnowledgeLvl` DISABLE KEYS */;
 INSERT INTO `KnowledgeLvl` VALUES (1,'Child'),(2,'Teenager'),(3,'Adult'),(4,'Advanced');
 /*!40000 ALTER TABLE `KnowledgeLvl` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `Language`
@@ -90,11 +84,9 @@ CREATE TABLE `Language` (
 -- Dumping data for table `Language`
 --
 
-LOCK TABLES `Language` WRITE;
 /*!40000 ALTER TABLE `Language` DISABLE KEYS */;
 INSERT INTO `Language` VALUES (1,'English'),(2,'Russian'),(3,'Filipino'),(4,'Latvian');
 /*!40000 ALTER TABLE `Language` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `PaymentType`
@@ -114,11 +106,9 @@ CREATE TABLE `PaymentType` (
 -- Dumping data for table `PaymentType`
 --
 
-LOCK TABLES `PaymentType` WRITE;
 /*!40000 ALTER TABLE `PaymentType` DISABLE KEYS */;
 INSERT INTO `PaymentType` VALUES (1,'Visa'),(2,'MasterCard');
 /*!40000 ALTER TABLE `PaymentType` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `RPU`
@@ -138,10 +128,8 @@ CREATE TABLE `RPU` (
 -- Dumping data for table `RPU`
 --
 
-LOCK TABLES `RPU` WRITE;
 /*!40000 ALTER TABLE `RPU` DISABLE KEYS */;
 /*!40000 ALTER TABLE `RPU` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `Session`
@@ -179,10 +167,8 @@ CREATE TABLE `Session` (
 -- Dumping data for table `Session`
 --
 
-LOCK TABLES `Session` WRITE;
 /*!40000 ALTER TABLE `Session` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Session` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `Transaction`
@@ -207,10 +193,8 @@ CREATE TABLE `Transaction` (
 -- Dumping data for table `Transaction`
 --
 
-LOCK TABLES `Transaction` WRITE;
 /*!40000 ALTER TABLE `Transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Transaction` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
