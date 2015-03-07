@@ -12,6 +12,8 @@ public:
 
 	void pause();
 	void play();
+	bool isPlaying();
+	void rewind();
 
 	void run();
 	void stop();

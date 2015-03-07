@@ -59,7 +59,22 @@ int main(int argc, char **argv)
 
 	/* Enter state machine handling */
 	char c;
-	while (scanf("%c", &c) == 0);
+	do {
+		scanf("%c", &c);
+		switch (c) {
+		case 'p':
+			if (player->isPlaying())
+				player->pause();
+			else
+				player->play();
+			break;
+		case 'r':
+			player->rewind();
+			break;
+		default:
+			break;
+		}
+	} while (c != 'q');
 
 	/* shutdown procedure */
 	player->stop();

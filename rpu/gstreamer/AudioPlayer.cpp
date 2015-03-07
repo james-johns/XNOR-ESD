@@ -6,7 +6,7 @@
 
 AudioPlayer::AudioPlayer()
 {
-	pipeline = gst_parse_launch("audiotestsrc ! decodebin ! alsasink", NULL);
+	pipeline = gst_parse_launch("tcpserversrc host=127.0.0.1 port=3000 ! decodebin ! audioconvert ! alsasink", NULL);
 	gst_element_set_state(pipeline, GST_STATE_PAUSED);
 
 	loop = g_main_loop_new(NULL, FALSE);
@@ -42,4 +42,24 @@ void AudioPlayer::pause()
 void AudioPlayer::play()
 {
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
+}
+
+bool AudioPlayer::isPlaying()
+{
+	GstState state;
+	gst_element_get_state(pipeline, &state, NULL, 0);
+	return (state == GST_STATE_PLAYING);
+}
+
+// rewind the current playing stream by 5 seconds, or to the beginning of the stream; 
+// whichever is closer to the current position
+void AudioPlayer::rewind()
+{
+	gint64 nano;
+	gst_element_query_position(pipeline, GST_FORMAT_TIME, &nano);
+	if (nano < (5 * GST_SECOND))
+		nano = 5 * GST_SECOND;
+	gst_element_seek_simple(pipeline, GST_FORMAT_TIME, 
+				GstSeekFlags(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT), 
+				nano - (5 * GST_SECOND));
 }
