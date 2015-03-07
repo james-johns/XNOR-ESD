@@ -1,4 +1,0 @@
-
-#!/bin/bash
-
-gcc -o main main.c -lusb-1.0
