@@ -332,13 +332,13 @@ void testDevice(libusb_device_handle *handle)
     //Current thread handles top level functionality
 }
 
-int main()
+libusb_device_handle *openKeypadDevice()
 {
     int ret = libusb_init(NULL);
 
     if (ret > 0) {
         perror("libusb_init");
-        return ret;
+        return NULL;
     }
 
     libusb_device_handle *handle;
@@ -351,10 +351,14 @@ int main()
 
     if(handle == NULL) {
         fprintf(stderr, "Failed to get USB device handle; stopping.\n");
-        return 1;
+        return NULL;
     }
+    return handle;
+}
 
-    testDevice(handle);
+void closeKeypadDevice(libusb_device_handle *handle)
+{
+//    testDevice(handle);
 
     //Cleanup
     libusb_release_interface(handle, 0);
@@ -364,5 +368,4 @@ int main()
     libusb_close(handle);
     libusb_exit(NULL);
 
-    return 0;
 }

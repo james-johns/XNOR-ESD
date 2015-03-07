@@ -34,6 +34,7 @@ save-configs:
 
 all: install-configs
 	make -C buildroot/ all
+	make -C rpu/ all CROSS_COMPILE=arm-buildroot-linux-uclibcgnueabi- GST_LIBRARY_PATH=$(shell pwd)/buildroot/output/target/usr/lib PATH=$(PATH):$(shell pwd)/buildroot/output/host/usr/bin/
 
 clean:
 
