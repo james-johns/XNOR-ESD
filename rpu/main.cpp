@@ -1,6 +1,9 @@
 
 #include <stdio.h>
+#include <iostream>
 #include <gst/gst.h>
+#include <pthread.h>
+
 #include <KeypadDevice.h>
 #include <AudioPlayer.h>
 
@@ -24,15 +27,45 @@ void initGST(int *argc, char ***argv)
 
 }
 
+void *audioThreadEntry(void *arg)
+{
+	AudioPlayer *player = (AudioPlayer *)arg;
+	player->run();
+	std::cout << "Returning from audioThreadEntry" << std::endl;
+	return NULL;
+}
+
+void *ioThreadEntry(void *arg)
+{
+	return NULL;
+}
+
 int main(int argc, char **argv)
 {
+	pthread_t audioThread, ioThread;
+
+	/* Initialise required libraries */
 	initGST(&argc, &argv);
 	libusb_init(NULL);
-	KeypadDevice *keypad = new KeypadDevice();
-	
-	AudioPlayer *player = new AudioPlayer();
-	player->run();
 
+	/* Instantiate control objects */
+	KeypadDevice *keypad = new KeypadDevice();	
+	AudioPlayer *player = new AudioPlayer();
+
+	/* Create threads */
+	if (pthread_create(&audioThread, NULL, audioThreadEntry, player) != 0) {
+		perror("Could not create audio thread");
+	}
+
+	/* Enter state machine handling */
+	char c;
+	while (scanf("%c", &c) == 0);
+
+	/* shutdown procedure */
+	player->stop();
+	pthread_join(audioThread, NULL);
+	delete player;
+	delete keypad;
 
 	return 0;
 }

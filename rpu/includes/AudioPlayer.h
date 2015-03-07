@@ -10,7 +10,11 @@ public:
 	AudioPlayer();
 	~AudioPlayer();
 
+	void pause();
+	void play();
+
 	void run();
+	void stop();
 
 private:
 	GstElement *pipeline;
