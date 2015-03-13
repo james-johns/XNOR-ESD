@@ -10,7 +10,7 @@ CXX:=$(CROSS_COMPILE)g++
 LD:=$(CXX)
 CFLAGS?= `pkg-config libusb-1.0 --cflags`
 CXXFLAGS?=`pkg-config gstreamer-1.0 --cflags` `pkg-config libusb-1.0 --cflags` -I./includes
-LDFLAGS?=$(GST_LIBRARY_PATH) -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lusb-1.0 -lpthread
+LDFLAGS?=$(GST_LIBRARY_PATH) -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lusb-1.0 -lpthread -lcurl
 
 all: rpuclient
 

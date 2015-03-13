@@ -3,6 +3,7 @@
 #include <iostream>
 #include <gst/gst.h>
 #include <pthread.h>
+#include <curl/curl.h>
 
 #include <KeypadDevice.h>
 #include <AudioPlayer.h>
@@ -47,6 +48,7 @@ int main(int argc, char **argv)
 	/* Initialise required libraries */
 	initGST(&argc, &argv);
 	libusb_init(NULL);
+	curl_global_init(CURL_GLOBAL_DEFAULT);
 
 	/* Instantiate control objects */
 	KeypadDevice *keypad = new KeypadDevice();	
@@ -81,6 +83,10 @@ int main(int argc, char **argv)
 	pthread_join(audioThread, NULL);
 	delete player;
 	delete keypad;
+
+	curl_global_cleanup();
+	libusb_exit(NULL);
+	gst_deinit();
 
 	return 0;
 }
