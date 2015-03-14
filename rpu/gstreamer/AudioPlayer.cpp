@@ -14,7 +14,8 @@ AudioPlayer::AudioPlayer()
 
 AudioPlayer::~AudioPlayer()
 {
-	
+	gst_element_set_state(pipeline, GST_STATE_NULL);
+	gst_object_unref(pipeline);
 }
 
 // Begin running the gstreamer main loop for this player.
