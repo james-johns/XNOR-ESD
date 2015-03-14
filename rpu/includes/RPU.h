@@ -26,6 +26,10 @@ public:
 	void sendEvent(Event *evt);
 	Event *getEvent();
 
+	AudioPlayer *getAudioPlayer();
+
+	static std::vector<char *> *getIPAddress();
+
 private:
 	enum RPUState_e state;
 	std::queue<Event *> *eventQueue;
