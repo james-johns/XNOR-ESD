@@ -1,13 +1,18 @@
 
 #include <stdio.h>
+#include <unistd.h>
 #include <iostream>
+#include <queue>
 #include <gst/gst.h>
 #include <pthread.h>
 #include <curl/curl.h>
 
 #include <KeypadDevice.h>
 #include <AudioPlayer.h>
+#include <Event.h>
+#include <RPU.h>
 
+// initialise Gstreamer library
 void initGST(int *argc, char ***argv)
 {
 	const gchar *nano_str;
@@ -28,6 +33,7 @@ void initGST(int *argc, char ***argv)
 
 }
 
+// Thread for handling audio content
 void *audioThreadEntry(void *arg)
 {
 	AudioPlayer *player = (AudioPlayer *)arg;
@@ -36,34 +42,16 @@ void *audioThreadEntry(void *arg)
 	return NULL;
 }
 
+// Thread for handling IO
 void *ioThreadEntry(void *arg)
 {
-	return NULL;
-}
-
-int main(int argc, char **argv)
-{
-	pthread_t audioThread, ioThread;
-
-	/* Initialise required libraries */
-	initGST(&argc, &argv);
-	libusb_init(NULL);
-	curl_global_init(CURL_GLOBAL_DEFAULT);
-
-	/* Instantiate control objects */
-	KeypadDevice *keypad = new KeypadDevice();	
-	AudioPlayer *player = new AudioPlayer();
-
-	/* Create threads */
-	if (pthread_create(&audioThread, NULL, audioThreadEntry, player) != 0) {
-		perror("Could not create audio thread");
-	}
-
-	/* Enter state machine handling */
-	char c;
+	bool running = true;
+	char *c;
+	RPU *prog = (RPU *)arg;
 	do {
-		scanf("%c", &c);
-		switch (c) {
+		c = new char;
+		scanf("%c", c);
+		/*		switch (c) {
 		case 'p':
 			if (player->isPlaying())
 				player->pause();
@@ -75,14 +63,53 @@ int main(int argc, char **argv)
 			break;
 		default:
 			break;
+			}*/
+		printf("Input: %c\n", *c);
+		if (*c == 'q')
+			running = false;
+		prog->sendEvent(new Event(KEYPAD_INPUT, c));
+	} while (running);
+	delete c;
+
+	prog->sendEvent(new Event(QUIT, NULL)); // send event to quit application
+
+	return NULL;
+}
+
+int main(int argc, char **argv)
+{
+	bool running = true;
+	/* Initialise required libraries */
+	initGST(&argc, &argv);
+	libusb_init(NULL);
+	curl_global_init(CURL_GLOBAL_DEFAULT);
+
+	/* Instantiate control objects */
+	RPU *prog = new RPU(audioThreadEntry, ioThreadEntry);
+
+	/* Enter state machine handling */
+	Event *evt = NULL;
+	do {
+		if (evt != NULL) {
+			delete evt;
+			evt = NULL;
 		}
-	} while (c != 'q');
+		usleep(100);
+		evt = prog->getEvent();
+		if (evt != NULL) {
+			// handle evt
+			switch (evt->getType()) {
+			case QUIT:
+				running = false;
+				break;
+			default:
+				break;
+			}
+		}
+	} while (running);
 
 	/* shutdown procedure */
-	player->stop();
-	pthread_join(audioThread, NULL);
-	delete player;
-	delete keypad;
+	delete prog;
 
 	curl_global_cleanup();
 	libusb_exit(NULL);

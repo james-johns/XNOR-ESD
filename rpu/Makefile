@@ -1,6 +1,6 @@
 
 
-obj-y:=main.o keypad/KeypadDevice.o gstreamer/AudioPlayer.o
+obj-y:=main.o Event.o RPU.o keypad/KeypadDevice.o gstreamer/AudioPlayer.o
 
 CROSS_COMPILE?=
 GST_LIBRARY_PATH?=
