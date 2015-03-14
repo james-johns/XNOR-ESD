@@ -7,7 +7,7 @@
 
 class AudioPlayer {
 public:
-	AudioPlayer();
+	AudioPlayer(const char *ipaddr);
 	~AudioPlayer();
 
 	void pause();
