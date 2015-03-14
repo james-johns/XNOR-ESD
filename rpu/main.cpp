@@ -99,6 +99,10 @@ int main(int argc, char **argv)
 		if (evt != NULL) {
 			// handle evt
 			switch (evt->getType()) {
+			case KEYPAD_INPUT:
+				if (*(char *)evt->getArguments() == 'p')
+					prog->getAudioPlayer()->play();
+				break;
 			case QUIT:
 				running = false;
 				break;
