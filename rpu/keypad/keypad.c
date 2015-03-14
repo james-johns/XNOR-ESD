@@ -162,7 +162,7 @@ int writeCommand(char * command, char * buffer, libusb_device_handle *handle)
 
 //Return 7seg data byte for numbers 0-9
 //Need to extend to hex chars and .
-void digitToSeg(unsigned int num, char chars[2])
+void KeypadDevice::digitToSeg(unsigned int num, char chars[2])
 {
     char lookup[10][2] = {"3F", "06", "5B", "4F", "66", "6D", "7D", "07", "7F", "6F"};
 
