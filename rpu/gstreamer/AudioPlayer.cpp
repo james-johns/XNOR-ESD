@@ -49,6 +49,14 @@ void AudioPlayer::play()
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
 }
 
+void AudioPlayer::playpause()
+{
+	if (isPlaying())
+		pause();
+	else
+		play();
+}
+
 bool AudioPlayer::isPlaying()
 {
 	GstState state;

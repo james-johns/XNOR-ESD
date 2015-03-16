@@ -14,6 +14,8 @@ public:
 	void play();
 	bool isPlaying();
 	void rewind();
+	void playpause(); // trigger play when paused, pause when paying
+
 
 	void run();
 	void stop();
