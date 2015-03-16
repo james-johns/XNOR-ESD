@@ -71,6 +71,7 @@ void RPU::tick()
 				running = false;
 				break;
 			default:
+				fprintf(stderr, "RPU::tick: Unknown input\n");
 				break;
 			}
 			break;

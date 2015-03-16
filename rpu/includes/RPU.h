@@ -28,6 +28,8 @@ public:
 	void sendEvent(Event *evt);
 	Event *getEvent();
 
+	KeypadDevice *getKeypadDevice() { return keypad; }
+
 	bool isRunning() { return running; }
 
 	static std::vector<char *> *getIPAddress();

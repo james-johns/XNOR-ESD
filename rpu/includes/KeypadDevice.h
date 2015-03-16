@@ -27,7 +27,7 @@ public:
 
 	void update(void);
 
-
+	bool isConnected() { return (handle != NULL); }
 
 private:
 	libusb_device_handle *handle;

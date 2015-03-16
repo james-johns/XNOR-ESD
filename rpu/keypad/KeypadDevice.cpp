@@ -38,6 +38,7 @@ KeypadDevice::KeypadDevice()
 	if (found) {
 		err = libusb_open(found, &handle);
 		if (err) {
+			perror("KeypadDevice");
 			handle = NULL;
 			return;
 		}
@@ -146,7 +147,7 @@ void KeypadDevice::set7Seg(char value, int digit)
 
 //Returns the char value of the specified row/column on the keypad
 char KeypadDevice::keypadLookup(int row, int column) {
-	const char lookup [4][4] = {{'1','4','7','A'}, {'2','5','8','0'}, {'3', '6', '9', 'B'}, {'F', 'E', 'D', 'C'}};
+	const char lookup [4][4] = {{'1','4','7','r'}, {'2','5','8','p'}, {'3', '6', '9', 'f'}, {'c', 'q', 'w', 's'}};
 
 	return lookup[column][row];
 }

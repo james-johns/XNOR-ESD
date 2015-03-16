@@ -49,25 +49,38 @@ void *ioThreadEntry(void *arg)
 {
 	char *c;
 	RPU *prog = (RPU *)arg;
-	fd_set fds;
-	struct timeval tv;
-	do {
-		tv.tv_sec = 0;
-		tv.tv_usec = 0;
-		FD_ZERO(&fds);
-		FD_SET(fileno(stdin), &fds);
-		
-		if (select(1, &fds, NULL, NULL, &tv) > 0) {
+	KeypadDevice *keypad = prog->getKeypadDevice();
+	if (keypad->isConnected()) {
+		do {
+			keypad->update();
 			c = new char;
-			scanf("%c", c);
+			*c = keypad->getKeyPressed();
+			if (*c)
+				prog->sendEvent(new Event(KEYPAD_INPUT, c));
+			else
+				delete c;
+		} while (prog->isRunning());
+	} else {
 
-			printf("Input: %c\n", *c);
-			prog->sendEvent(new Event(KEYPAD_INPUT, c));
-		} else {
-			usleep(100);
-		}
-	} while (prog->isRunning());
+		fd_set fds;
+		struct timeval tv;
+		do {
+			tv.tv_sec = 0;
+			tv.tv_usec = 0;
+			FD_ZERO(&fds);
+			FD_SET(fileno(stdin), &fds);
 
+			if (select(1, &fds, NULL, NULL, &tv) > 0) {
+				c = new char;
+				scanf("%c", c);
+
+				printf("Input: %c\n", *c);
+				prog->sendEvent(new Event(KEYPAD_INPUT, c));
+			} else {
+				usleep(100);
+			}
+		} while (prog->isRunning());
+	}
 	//	prog->sendEvent(new Event(QUIT, NULL)); // send event to quit application
 
 	return NULL;
