@@ -23,14 +23,17 @@ public:
 	RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *));
 	~RPU();
 	
+	void tick(); // handle events and manage other objects
+
 	void sendEvent(Event *evt);
 	Event *getEvent();
 
-	AudioPlayer *getAudioPlayer();
+	bool isRunning() { return running; }
 
 	static std::vector<char *> *getIPAddress();
 
 private:
+	bool running;
 	enum RPUState_e state;
 	std::queue<Event *> *eventQueue;
 	KeypadDevice *keypad;

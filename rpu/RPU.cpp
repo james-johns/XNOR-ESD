@@ -40,16 +40,44 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 	if (pthread_create(&ioThread, NULL, ioThreadEntry, this) != 0) {
 		perror("Could not create audio thread");
 	}
+	running = true;
 }
 
 RPU::~RPU()
 {
+	running = false;
 	player->stop();
 	pthread_join(ioThread, NULL);
 	pthread_join(audioThread, NULL);
 	delete player;
 	delete keypad;
 
+}
+
+void RPU::tick()
+{
+	Event *evt = getEvent();
+	if (evt != NULL) {
+		switch (evt->getType()) {
+		case KEYPAD_INPUT:
+			switch (*(char *)evt->getArguments()) {
+			case 'p':
+				player->playpause();
+				break;
+			case 'r':
+				player->rewind();
+				break;
+			case 'q':
+				running = false;
+				break;
+			default:
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void RPU::sendEvent(Event *evt)
@@ -65,11 +93,6 @@ Event *RPU::getEvent()
 		eventQueue->pop();
 	}
 	return evt;
-}
-
-AudioPlayer *RPU::getAudioPlayer()
-{
-	return player;
 }
 
 std::vector<char *> *RPU::getIPAddress()

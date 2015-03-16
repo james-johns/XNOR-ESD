@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <iostream>
 #include <queue>
+#include <sys/select.h>
+
 #include <gst/gst.h>
 #include <pthread.h>
 #include <curl/curl.h>
@@ -45,40 +47,34 @@ void *audioThreadEntry(void *arg)
 // Thread for handling IO
 void *ioThreadEntry(void *arg)
 {
-	bool running = true;
 	char *c;
 	RPU *prog = (RPU *)arg;
+	fd_set fds;
+	struct timeval tv;
 	do {
-		c = new char;
-		scanf("%c", c);
-		/*		switch (c) {
-		case 'p':
-			if (player->isPlaying())
-				player->pause();
-			else
-				player->play();
-			break;
-		case 'r':
-			player->rewind();
-			break;
-		default:
-			break;
-			}*/
-		printf("Input: %c\n", *c);
-		if (*c == 'q')
-			running = false;
-		prog->sendEvent(new Event(KEYPAD_INPUT, c));
-	} while (running);
-	delete c;
+		tv.tv_sec = 0;
+		tv.tv_usec = 0;
+		FD_ZERO(&fds);
+		FD_SET(fileno(stdin), &fds);
+		
+		if (select(1, &fds, NULL, NULL, &tv) > 0) {
+			c = new char;
+			scanf("%c", c);
 
-	prog->sendEvent(new Event(QUIT, NULL)); // send event to quit application
+			printf("Input: %c\n", *c);
+			prog->sendEvent(new Event(KEYPAD_INPUT, c));
+		} else {
+			usleep(100);
+		}
+	} while (prog->isRunning());
+
+	//	prog->sendEvent(new Event(QUIT, NULL)); // send event to quit application
 
 	return NULL;
 }
 
 int main(int argc, char **argv)
 {
-	bool running = true;
 	/* Initialise required libraries */
 	initGST(&argc, &argv);
 	libusb_init(NULL);
@@ -88,29 +84,10 @@ int main(int argc, char **argv)
 	RPU *prog = new RPU(audioThreadEntry, ioThreadEntry);
 
 	/* Enter state machine handling */
-	Event *evt = NULL;
 	do {
-		if (evt != NULL) {
-			delete evt;
-			evt = NULL;
-		}
+		prog->tick();
 		usleep(100);
-		evt = prog->getEvent();
-		if (evt != NULL) {
-			// handle evt
-			switch (evt->getType()) {
-			case KEYPAD_INPUT:
-				if (*(char *)evt->getArguments() == 'p')
-					prog->getAudioPlayer()->play();
-				break;
-			case QUIT:
-				running = false;
-				break;
-			default:
-				break;
-			}
-		}
-	} while (running);
+	} while (prog->isRunning());
 
 	/* shutdown procedure */
 	delete prog;
