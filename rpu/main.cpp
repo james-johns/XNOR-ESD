@@ -55,7 +55,9 @@ void *ioThreadEntry(void *arg)
 			keypad->update();
 			c = new char;
 			*c = keypad->getKeyPressed();
-			if (*c)
+			if (*c == '\n')
+				delete c;
+			else if (*c)
 				prog->sendEvent(new Event(KEYPAD_INPUT, c));
 			else
 				delete c;
@@ -74,8 +76,12 @@ void *ioThreadEntry(void *arg)
 				c = new char;
 				scanf("%c", c);
 
-				printf("Input: %c\n", *c);
-				prog->sendEvent(new Event(KEYPAD_INPUT, c));
+				if (*c == '\n') {
+					delete c;
+				} else {
+					printf("Input: %c\n", *c);
+					prog->sendEvent(new Event(KEYPAD_INPUT, c));
+				}
 			} else {
 				usleep(100);
 			}

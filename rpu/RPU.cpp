@@ -70,6 +70,13 @@ void RPU::tick()
 			case 'q':
 				running = false;
 				break;
+			case 'w':
+			case 's':
+			case 'f':
+			case 'c':
+			case '1' ... '9':
+				fprintf(stderr, "Input not handled yet\n");
+				break;
 			default:
 				fprintf(stderr, "RPU::tick: Unknown input\n");
 				break;
