@@ -15,8 +15,9 @@ void *updateThreadFunc(void *arg)
 {
     KeypadDevice *keypad = (KeypadDevice *) arg;
 
-    while(1) {
-        keypad->update();
+    for(int i = 0; i < 4; i++) {
+        keypad->update(i);
+        usleep(10000); //Arbitrary
     }
 }
 
@@ -30,6 +31,12 @@ int main(int argc, char **argv)
 
     std::cout << "Starting keypad" << std::endl;
     KeypadDevice *keypad = new KeypadDevice();
+
+    if(!keypad->isConnected()) {
+        std::cout << "No keypad connected" << std::endl;
+        return 1;
+    }
+
     keypad->set7Seg(""); //Clears display
 
 
@@ -45,9 +52,16 @@ int main(int argc, char **argv)
     std::string data;
     int input;
 
+    int column = 0;
+
     while(1) {
         #ifndef _THREADED_
-        keypad->update(); //Refresh 7 seg and scan keypad
+        keypad->update(column); //Refresh 7 seg and scan keypad
+        if(++column == 4) {
+            column = 0;
+        }
+        usleep(10000); //Arbitrary
+
         #endif
 
         key = keypad->getKeyPressed();

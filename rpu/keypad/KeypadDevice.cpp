@@ -23,6 +23,7 @@ KeypadDevice::KeypadDevice()
 
 	if (count < 0) {
 		perror("No devices found");
+		libusb_free_device_list(deviceList, 1);
 		return;
 	}
 
@@ -40,24 +41,25 @@ KeypadDevice::KeypadDevice()
 		if (err) {
 			perror("KeypadDevice");
 			handle = NULL;
-			return;
 		}
 	}
 	else {
 		printf("No devices found\n");
 		handle = NULL;
-		return;
 	}
 
 	libusb_free_device_list(deviceList, 1);
 
-	libusb_detach_kernel_driver(handle, 0);
-	libusb_detach_kernel_driver(handle, 1);
-	libusb_claim_interface(handle, 0);
-	libusb_claim_interface(handle, 1);
+	if(handle != NULL) {
 
-	//Set port directions
-	configureDevice();
+		libusb_detach_kernel_driver(handle, 0);
+		libusb_detach_kernel_driver(handle, 1);
+		libusb_claim_interface(handle, 0);
+		libusb_claim_interface(handle, 1);
+
+		//Set port directions
+		configureDevice();
+	}
 }
 
 KeypadDevice::~KeypadDevice()
@@ -77,7 +79,7 @@ void KeypadDevice::charToSeg(char input, char output[2])
 	const int lookupSize = 18;
 
 	char lookup[lookupSize][3] = {"3F","06","5B","4F","66","6D","7D","07","7F","6F","77","7C","39","5E","79","71","00", "80"};
-						        // 0     1    2    3   4    5    6    7    8    9    A    B    C    D    E    F   ' '   .
+	// 0     1    2    3   4    5    6    7    8    9    A    B    C    D    E    F   ' '   .
 
 	if(input == '.') {
 		input = lookupSize-1; //'.' is the final entry in the array
@@ -126,7 +128,7 @@ void KeypadDevice::set7Seg(const char * input)
 
 void KeypadDevice::set7Seg(std::string input)
 {
-	set7Seg(input.c_str());
+	sevenSegData = input;
 }
 
 void KeypadDevice::set7Seg(unsigned int value)
@@ -141,7 +143,6 @@ void KeypadDevice::set7Seg(char value, int digit)
 {
 	if(digit >= 0 && digit < 4) {
 		sevenSegData[digit] = value;
-		std::cout << sevenSegData;
 	}
 }
 
@@ -188,15 +189,15 @@ char KeypadDevice::sendCommand(std::string cmd)
 	//Get return value from buffer
 	for(int i = 0; i < length; i++) {
 		if(buffer[i] == 'F') { //This means it's returning read data
-			isRead = true;
-		}
+		isRead = true;
 	}
-	if(isRead) {
-		return buffer[4]; //This is the char of returned data following 'F'
-	}
-	else {
-		return 0;
-	}
+}
+if(isRead) {
+	return buffer[4]; //This is the char of returned data following 'F'
+}
+else {
+	return 0;
+}
 }
 
 //Retrieves and clears key press (allowing another press to be registered)
@@ -208,13 +209,10 @@ char KeypadDevice::getKeyPressed()
 	return temp;
 }
 
-
-
-
 //Refresh 7 segs and scan keypad
-void KeypadDevice::update()
+void KeypadDevice::update(int column)
 {
-	int i, result, row;
+	int result, row;
 
 	char readChar, pressedChar;
 
@@ -227,47 +225,42 @@ void KeypadDevice::update()
 
 	stringToSeg(sevenSegData.c_str(), hexCodes);
 
-	for(i = 0; i < 4; i++) { //For each 7 seg...
+	//Get hex code for current 7 seg
+	data[0] = hexCodes[column][0];
+	data[1] = hexCodes[column][1];
 
-		//Get hex code for current 7 seg
-		data[0] = hexCodes[i][0];
-		data[1] = hexCodes[i][1];
+	//Clear 7 seg before selecting the next one (makes for a cleaner display)
+	commandWrite[5] = '0';
+	commandWrite[6] = '0';
+	sendCommand(commandWrite);
 
-		//Clear 7 seg before selecting the next one (makes for a cleaner display)
-		commandWrite[5] = '0';
-		commandWrite[6] = '0';
-		sendCommand(commandWrite);
+	//Select appropriate 7 seg
+	commandSelect[6] = '0' + (1 << column);
+	sendCommand(commandSelect);
 
-		//Select appropriate 7 seg
-		commandSelect[6] = '0' + (1 << i);
-		sendCommand(commandSelect);
+	//Write number to display
+	commandWrite[5] = data[0]; //Get hex chars from array
+	commandWrite[6] = data[1];
+	sendCommand(commandWrite);
 
-		//Write number to display
-		commandWrite[5] = data[0]; //Get hex chars from array
-		commandWrite[6] = data[1];
-		sendCommand(commandWrite);
+	//Read from keypad
+	readChar = sendCommand(commandRead);
+	if(readChar > '0' && !stillPressed) { //If a button has been pressed...
+		row = (readChar - '0'); //Get row of pressed button
 
-		usleep(2000); //Need to calculate delay from desired refresh rate
-
-		//Read from keypad
-		readChar = sendCommand(commandRead);
-		if(readChar > '0' && !stillPressed) { //If a button has been pressed...
-			row = (readChar - '0'); //Get row of pressed button
-
-			row /= 2; //Convert 1,2,4,8 to the row number (0,1,2,3)
-			if(row == 4) {
-				row--;
-			}
-
-			//Use row and column to get the value of the pressed key
-			keyPressed = keypadLookup(row,i);
-			pressedColumn = i;
-			stillPressed = true;
+		row /= 2; //Convert 1,2,4,8 to the row number (0,1,2,3)
+		if(row == 4) {
+			row--;
 		}
-		else if(readChar == '0' && pressedColumn == i && stillPressed) { //If button has been released...
-			pressedChar = 0; //Reset pressed char to allow another key press
-			stillPressed = false;
-		}
+
+		//Use row and column to get the value of the pressed key
+		keyPressed = keypadLookup(row,column);
+		pressedColumn = column;
+		stillPressed = true;
+	}
+	else if(readChar == '0' && pressedColumn == column && stillPressed) { //If button has been released...
+		pressedChar = 0; //Reset pressed char to allow another key press
+		stillPressed = false;
 	}
 }
 
@@ -277,13 +270,13 @@ void KeypadDevice::configureDevice()
 	std::string configOne = "@00D1FF\r"; //Set port 1 as input
 	std::string configTwo = "@00D200\r"; //Set port 2 as output
 
-    int i, len, result;
+	int i, len, result;
 
-    result = libusb_reset_device(handle);
-    if (result < 0) {
-        fprintf(stderr, "Unable to reset device\n");
-        return;
-    }
+	result = libusb_reset_device(handle);
+	if (result < 0) {
+		fprintf(stderr, "Unable to reset device\n");
+		return;
+	}
 
 	sendCommand(configZero);
 	sendCommand(configOne);

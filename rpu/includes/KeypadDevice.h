@@ -25,7 +25,8 @@ public:
 
 	char getKeyPressed(void);
 
-	void update(void);
+
+	void update(int column);
 
 	bool isConnected() { return (handle != NULL); }
 
