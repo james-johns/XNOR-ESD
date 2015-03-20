@@ -52,15 +52,17 @@ void *ioThreadEntry(void *arg)
 	KeypadDevice *keypad = prog->getKeypadDevice();
 	if (keypad->isConnected()) {
 		do {
-			keypad->update();
-			c = new char;
-			*c = keypad->getKeyPressed();
-			if (*c == '\n')
-				delete c;
-			else if (*c)
-				prog->sendEvent(new Event(KEYPAD_INPUT, c));
-			else
-				delete c;
+			for (int i = 0; i < 4; i++) {
+				keypad->update(i);
+				c = new char;
+				*c = keypad->getKeyPressed();
+				if (*c == '\n')
+					delete c;
+				else if (*c)
+					prog->sendEvent(new Event(KEYPAD_INPUT, c));
+				else
+					delete c;
+		}
 		} while (prog->isRunning());
 	} else {
 
