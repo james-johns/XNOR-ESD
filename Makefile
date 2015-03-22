@@ -41,7 +41,7 @@ rpu-clean:
 ###
 .PHONY: default all clean clean-* rebuild-* rpu buildroot
 
-all: buildroot rpu
+all: buildroot rpu-build
 
 clean:
 
