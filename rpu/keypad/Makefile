@@ -1,7 +1,6 @@
 
-
-main: main.c
-	gcc -I/usr/include/libusb-1.0 -lusb-1.0 -o out main.c -g
+testKeypad: testKeypad.cpp KeypadDevice.cpp ../includes/KeypadDevice.h
+	g++ -I../includes -I/usr/include/libusb-1.0 -o testKeypad testKeypad.cpp KeypadDevice.cpp -lusb-1.0 -lpthread 
 
 clean:
-	rm out
+	rm testKeypad

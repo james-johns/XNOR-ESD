@@ -4,9 +4,13 @@
 #include <AudioPlayer.h>
 #include <gst/gst.h>
 
-AudioPlayer::AudioPlayer()
+AudioPlayer::AudioPlayer(const char *ipaddr)
 {
-	pipeline = gst_parse_launch("tcpserversrc host=127.0.0.1 port=3000 ! decodebin ! audioconvert ! alsasink", NULL);
+	std::string pipelineString = "tcpserversrc host=";
+	pipelineString += (ipaddr != NULL) ? ipaddr : "127.0.0.1";
+	pipelineString += " port=3000 ! decodebin ! audioconvert ! alsasink";
+	std::cout << "Using pipeline: " << pipelineString << std::endl;
+	pipeline = gst_parse_launch(pipelineString.c_str(), NULL);
 	gst_element_set_state(pipeline, GST_STATE_PAUSED);
 
 	loop = g_main_loop_new(NULL, FALSE);
@@ -14,7 +18,8 @@ AudioPlayer::AudioPlayer()
 
 AudioPlayer::~AudioPlayer()
 {
-	
+	gst_element_set_state(pipeline, GST_STATE_NULL);
+	gst_object_unref(pipeline);
 }
 
 // Begin running the gstreamer main loop for this player.
@@ -42,6 +47,14 @@ void AudioPlayer::pause()
 void AudioPlayer::play()
 {
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
+}
+
+void AudioPlayer::playpause()
+{
+	if (isPlaying())
+		pause();
+	else
+		play();
 }
 
 bool AudioPlayer::isPlaying()

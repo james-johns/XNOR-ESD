@@ -1,16 +1,18 @@
 
 
-obj-y:=main.o keypad/KeypadDevice.o gstreamer/AudioPlayer.o
+obj-y:=main.o Event.o RPU.o keypad/KeypadDevice.o gstreamer/AudioPlayer.o
 
 CROSS_COMPILE?=
-GST_LIBRARY_PATH?=
+DEBUG?=
 
 CC:=$(CROSS_COMPILE)gcc
 CXX:=$(CROSS_COMPILE)g++
 LD:=$(CXX)
-CFLAGS?= `pkg-config libusb-1.0 --cflags`
-CXXFLAGS?=`pkg-config gstreamer-1.0 --cflags` `pkg-config libusb-1.0 --cflags` -I./includes
-LDFLAGS?=$(GST_LIBRARY_PATH) -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lusb-1.0 -lpthread
+CFLAGS?=`pkg-config libusb-1.0 --cflags` $(DEBUG)
+CXXFLAGS?=`pkg-config gstreamer-1.0 --cflags` `pkg-config libusb-1.0 --cflags` -I./includes $(DEBUG)
+LDFLAGS?=-lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lusb-1.0 -lpthread -lcurl
+
+.PHONY: all clean rpuclient
 
 all: rpuclient
 
