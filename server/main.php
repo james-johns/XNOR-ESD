@@ -2,37 +2,29 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Untitled Document</title>
+<title>XnOR MADS KIOSK</title>
 
 
 <style>
 body {
-    background-color: #000000;
+    background-color: #001941;
 } 
 #main {
-    background-color:#5C320D;
     color:white;
     text-align:center;
     padding:5px;
-	width: 800px;
-    margin: 0 auto;
-
-
+	width: 700px;
+    margin: 0px auto;
 }
 
 table {
     border: 0px;
-	width: 100%;
+	
 
 }
 td {
     padding: 5px;
 }
-
-.bigbutton { 
-	width: 200px; 
-	height: 100px;
-} 
 
 </style>
 </head>
@@ -41,22 +33,22 @@ td {
 <div id="main">
 <table width="200" border="0">
   <tr>
-    <td colspan="3" align="center"><h1>KIOSK MENU</h1></td>
+    <td colspan="3" align="center"><img src="img/header.png"></td>
     </tr>
   <tr>
-    <td align="center"><input type="submit" class="bigbutton" value="Register User" title="Subscribe" onclick="window.location.href='registeruser.php'" /></td>
-    <td align="center"><input type="submit" class="bigbutton" value="Search User" title="Subscribe" onclick="window.location.href='registeruser.php'" /> </td>
-    <td align="center"><input type="submit" class="bigbutton" value="Delete User" title="Subscribe" onclick="window.location.href='registeruser.php'" /></td>
+    <td align="center"><input type="image" src="img/reguserbutton.png" value="registerUser" title="Register User" onclick="window.location.href='registeruser.php'" /></td>
+    <td align="center"><input type="image" src="img/searchuserbutton.png" value="searchUser" title="Search User, Complete Payment" onclick="window.location.href='searchuser.php'" /> </td>
+    <td align="center"><input type="image" src="img/deluserbutton.png" value="deleteUser" title="Delete User" onclick="window.location.href='registeruser.php'" /></td>
     </tr>
   <tr>
-    <td align="center"><input type="submit" class="bigbutton" value="Complete Payment" title="Subscribe" onclick="window.location.href='payment.php'" /></td>
-    <td align="center"><input type="submit" class="bigbutton" value="OPEN" title="Subscribe" onclick="window.location.href='registeruser.php'" /></td>
-    <td align="center"><input type="submit" class="bigbutton" value="Logout RPU" title="Subscribe" onclick="window.location.href='registeruser.php'" /></td>
+    <td align="center"><img src="img/openbutton.png"></td>
+    <td align="center"><input type="image" src="img/logoutrpubutton.png" value="logoutRPU" title="Logout RPU" onclick="window.location.href='registeruser.php'" /></td>
+    <td align="center"><img src="img/openbutton.png"></td>
     </tr>
   <tr>
-    <td align="center"><input type="submit" class="bigbutton" value="Manage Track" title="Subscribe" onclick="window.location.href='registeruser.php'" /></td>
-    <td align="center"><input type="submit" class="bigbutton" value="Delete Track" title="Subscribe" onclick="window.location.href='registeruser.php'" /></td>
-    <td align="center"><input type="submit" class="bigbutton" value="Replace Track" title="Subscribe" onclick="window.location.href='registeruser.php'" /></td>
+    <td align="center"><input type="image" src="img/addtrackbutton.png" value="addTrack" title="Add Track" onclick="window.location.href='registeruser.php'" /></td>
+    <td align="center"><input type="image" src="img/replacetrackbutton.png" value="deleteTrack" title="Delete Track" onclick="window.location.href='registeruser.php'" /></td>
+    <td align="center"><input type="image" src="img/deltrackbutton.png" value="replaceTrack" title="Replace Track" onclick="window.location.href='registeruser.php'" /></td>
     </tr>
 </table>
 

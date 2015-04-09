@@ -370,48 +370,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div id="formsection">
 
 <div id="customerinformation">
-  <h2>Register User:</h2>
-<p align="right"><span class="error">* Required field for registration.</span></p>
+  <h2>Search User:</h2>
 <form method="post" action="api.cgi" id="registrationform">
 <fieldset>
-<legend>Customer Information:</legend>
+<legend>Search by Customer Information</legend>
 
 <table width="200" border="0">
   <tr>
-    <td width="33%" align="right">First Name: *</td>
+    <td width="33%" align="right">First Name: </td>
     <td width="67%"><input type="text" size="32" maxlength="32" name="forename">
     <span class="error"> <?php echo $forenameError;?></span>
     </td>
   </tr>
   <tr>
-    <td align="right">Surname: *</td>
+    <td align="right">Surname: </td>
     <td><input type="text" size="32" maxlength="32" name="surname">
     <span class="error"> <?php echo $surnameError;?></span>
     </td>
   </tr>
   <tr>
-    <td align="right">Address Line 1: *</td>
+    <td align="right">Address Line 1: </td>
     <td><input type="text" size="32" maxlength="32" name="addrline1">
     <span class="error"> <?php echo $addrline1Error;?></span>
     </td>
   </tr>
   <tr>
-    <td align="right">Address Line 2:</td>
-    <td><input type="text" size="32" maxlength="32" name="addrline2">
-    <span class="error"> <?php echo $addrline2Error;?></span>
-    </td>
-  </tr>
-  <tr>
-    <td align="right">Address Line 3:</td>
-    <td><input type="text" size="32" maxlength="32" name="addrline3">
-    <span class="error"> <?php echo $addrline3Error;?></span>
-    </td>
-  </tr>
-  <tr>
-    <td align="right">Town/City: *</td>
+    <td align="right">Town/City: </td>
     <td><input type="text" size="32" maxlength="32" name="towncity">
-    <span class="error"> <?php echo $towncityError;?></span>
-    </td>
+      <span class="error"> <?php echo $towncityError;?></span>
+      </td>
   </tr>
   <tr>
     <td align="right">County/Region:</td>
@@ -420,13 +407,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </td>
   </tr>
   <tr>
-    <td align="right">postcode: *</td>
+    <td align="right">Postcode: </td>
     <td><input type="text" size="32" maxlength="32" name="postcode">
     <span class="error"> <?php echo $postcodeError;?></span>
     </td>
   </tr>
   <tr>
-    <td align="right">Country: *</td>
+    <td align="right">Country: </td>
     <td>
     <select name="country">
     <option value="">Country...</option>
@@ -682,13 +669,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </td>
   </tr>
     <tr>
-    <td align="right">Language: *</td>
+    <td align="right">Language: </td>
     <td><input type="text" size="32" maxlength="32" name="language">
     <span class="error"> <?php echo $languageError;?></span>
     </td>
   </tr>
   <tr>
-    <td align="right">Contact mobile number: *</td>
+    <td align="right">Contact mobile number: </td>
     <td><input type="text" size="32" maxlength="32" name="mobilenum">
     <span class="error"> <?php echo $mobilenumError;?></span>
     </td>
@@ -699,7 +686,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <br>
 <center>
   <p>
-    <button type="submit" form="registrationform" value="Register">Register</button>
+    <button type="submit" form="searchform" value="Register">Search</button>
     &nbsp;&nbsp;
     <button type="submit" name="reset" >Reset Fields</button>
      &nbsp;&nbsp;
@@ -708,7 +695,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </center>
 &nbsp;<br>
 </form>
+<form method="post" action="api.cgi">
+<br>
+</fieldset>
+<fieldset>
+  <legend>Search by Payment Details:</legend>
+
+<table width="200" border="0">
+  <tr>
+    <td width="33%" align="right">Transaction Id: </td>
+    <td width="67%"><input type="text" size="32" maxlength="32" name="paytransid">
+    <span class="error"> <?php echo $paytransidError;?></span>
+    </td>
+  </tr>
+  <tr>
+    <td align="right">Payment Type: </td>
+    <td><input type="text" size="32" maxlength="16" name="paytype">
+    <span class="error"> <?php echo $paytypedError;?></span>
+    </td>
+  </tr>
+  <tr>
+    <td align="right">Date: </td>
+    <td><input type="date" size="32" maxlength="16" name="paydate">
+    <span class="error"> <?php echo $paydateError;?></span>
+    </td>
+  </tr>
+  <tr>
+    <td align="right">Time: </td>
+    <td><input type="time" size="32" maxlength="16" name="paytime">
+    <span class="error"> <?php echo $paytimeError; ?></span>
+    </td>
+  </tr>
+</table>
+
+</fieldset>
+<center>
+  <p>
+	<button type="submit" name="reset" >Search</button>
+     &nbsp;&nbsp;
+    <button type="submit" name="register" >Reset Fields</button>
+     &nbsp;&nbsp;
+    <button type="submit" name="reset" >Cancel</button>
+    
+  </p>
+</center>
+&nbsp;<br>
+</form>
 </div>
+
 
 <br><br>
 
