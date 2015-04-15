@@ -13,23 +13,122 @@
 #include <fcntl.h>
 //Set Variables
 
+#define DISPLAY_STR_LEN 255
+
+
+
 int displayDevice;
 int i;
-char displayString [18];
+char displayString [DISPLAY_STR_LEN];
 struct termios options;
-char disableSplash[1] = {0x7C};
 char splashOption[1] = {0x09};
-char blarg[1] = {254};
-char blarg2[1] = {192};
-char brightness[1]={0x7C};
+char selectOptions[1] = {254};
+char lineTwoSelect[1] = {192};
+
 char brightnessLevel[1]={150};
-char clearDisplay[1]= {0x01};
-int userInput;
-int usbOutput=0;
+
+char userInput;
+char usbOutput;
+int deviceOpen =0;
+int stringSize;
 char *testString="Test Complete";
 
-int main (int argc, char **argv)
+
+void initDevice()
 {
+  char *introString= "XNOR";
+
+  printf("opening ttyUSB0\n");
+  displayDevice = open("/dev/ttyUSB0", O_RDWR) ;
+  if( displayDevice == -1)
+    {
+      printf( "Cannot open USB device on /dev/ttyusb0\n\n");
+      return;
+    }
+  printf("file opened\n");
+  printf("%s\n",introString);
+  deviceOpen=1;
+  
+  
+  tcgetattr(displayDevice, &options);
+  
+  cfsetispeed(&options, B9600);
+  cfsetospeed(&options, B9600);
+  tcsetattr(displayDevice, TCSANOW, &options);
+  
+   write(displayDevice,introString,4);
+  
+  
+
+}
+
+void clearDisplay()
+{
+  char lineOneSelect[1]= {192};
+
+  write(displayDevice,selectOptions,sizeof(selectOptions));
+  write(displayDevice,lineOneSelect,sizeof(lineOneSelect));
+  write(displayDevice,("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),31);
+}
+
+
+void moveCursor(int charNumber)
+{
+char selectOptions[1] = {254}
+char characterNumber = charNumber+127
+write(displayDevice,selectOptions,sizeof(selectOptions));
+
+}
+
+
+void doUpdate()
+{
+
+
+}
+
+ 
+
+
+
+void displayUpdate (int displayUpdate,char *trackname)
+{
+  switch(displayUpdate)
+    {
+    case 1://Login Error
+      
+      break;
+      
+    case 2://Playback Request Error
+      
+      break;
+      
+    case 3://Generic Error
+      
+      break;
+      
+    case 4://welcome message
+      
+      break;
+      
+    case 5://Display track Info
+      
+      break;
+      
+    case 6://Display Menu
+      
+      break;
+ 
+    default:
+      
+      break;
+    }
+}
+
+
+
+int main (int argc, char **argv)
+{/*
   do 
   {
     printf("Which USB device is the display\n");
@@ -38,68 +137,73 @@ int main (int argc, char **argv)
     printf("[3] USB2\n");
     printf("[4] USB3\n");
     printf("[5] Debug Mode\n");
-    scanf("%d",&usbOutput);
+    scanf("%c",&usbOutput);
     getchar();
     printf("option chosen: %d\n",usbOutput);
     
     
     switch(usbOutput)
       {
-      case 1:
+      case '1':
 	printf("opening ttyUSB0\n");
 	displayDevice = open("/dev/ttyUSB0", O_RDWR) ;
 	if( displayDevice == -1)
 	  {
 	    printf( "Cannot open USB device on /dev/ttyusb0\n\n");
-	    return 0;
+	    break;
 	  }
 	printf("file opened\n");
+	deviceOpen=1;
 	break;
 	
-      case 2:
+      case '2':
 	printf("opening ttyUSB1\n");
 	displayDevice = open("/dev/ttyUSB1", O_RDWR) ;
 	if( displayDevice == -1)
 	  {
 	    printf( "Cannot open USB device on /dev/ttyusb0\n\n");
-	    return 0;
+	    break;
 	  }
 	printf("file opened\n");
+	deviceOpen=1;
 	break;
 	
-      case 3:
+      case '3':
 	printf("opening ttyUSB2\n");
 	displayDevice = open("/dev/ttyUSB2", O_RDWR) ;
 	if( displayDevice == -1)
 	  {
 	    printf( "Cannot open USB device on /dev/ttyusb0\n\n");
-	    return 0;
+	    break;
 	  }
 	printf("file opened\n");
+	deviceOpen=1;
 	break;
 	
-      case 4:
+      case '4':
 	printf("opening ttyUSB3\n");
 	displayDevice = open("/dev/ttyUSB3", O_RDWR) ;
 	if( displayDevice == -1)
 	  {
 	    printf( "Cannot open USB device on /dev/ttyusb0\n\n");
-	      return 0;
+	      break;
 	  }
 	  printf("file opened\n");
+	  deviceOpen=1;
 	  break;
 
-      case 5:
+      case '5':
 	printf("Entering Debug Mode\n");	 
 	printf("opening results.txt\n");
 	
-	displayDevice = open("/home/ryan/ESD-RPU/XNOR-ESD/rpu/Display/results.txt", O_RDWR) ; // open file for writing.
+	displayDevice = open("results.txt", O_RDWR) ; // open file for writing.
 	if( displayDevice == -1)
 	  {
 	    printf( "Cannot open results.txt\n\n");
 	    return 0;
 	  }
 	printf("file opened\n");
+	deviceOpen=1;
 	break;
 	
       default:
@@ -107,7 +211,7 @@ int main (int argc, char **argv)
 	userInput=0;
 	break;
       }
-  } while (usbOutput==0);
+  } while (deviceOpen==0);
   
     
     tcgetattr(displayDevice, &options);
@@ -126,35 +230,49 @@ int main (int argc, char **argv)
       printf("[3] Remove Splashscreen\n");
       printf("[4] Change screen brightness\n");
       printf("[5] Clear Screen\n");
-     scanf("%d",&userInput);
+     scanf("%c",&userInput);
       getchar();
       switch(userInput)
 	{
-	case 1:
+	case '1':
 	  printf("Enter text to send to display: ");
-	  fgets(displayString,sizeof(displayString),stdin);
+	  fgets(displayString,DISPLAY_STR_LEN,stdin);
 	  printf("String Entered : %s\n",displayString);
-	  write(displayDevice,displayString,sizeof(displayString));
-	  break;
+	  stringSize = strlen(displayString);
+	  printf("String Size : %d\n",stringSize);
+	  if(displayString[stringSize-1] == '\n')
+	    {
+	      displayString[stringSize-1] = ' ';
+	    }
+
+	  //  write(displayDevice,selectOptions,sizeof(selectOptions));
+	  //write(displayDevice,lineOneSelect,sizeof(lineOneSelect));
+
+	  write(displayDevice,displayString,stringSize);
+	  break;   
 	  
-	case 2:
-	  write(displayDevice,blarg,sizeof(blarg));
-	  write(displayDevice,blarg2,sizeof(blarg2));
+	case '2':
+	  write(displayDevice,selectOptions,sizeof(selectOptions));
+	  write(displayDevice,lineTwoSelect,sizeof(lineTwoSelect));
 	  write(displayDevice,testString,sizeof(testString));
 	  break;
 	  
-	case 3:
-	  write(displayDevice,disableSplash,sizeof(displayDevice));
-	  write(displayDevice,splashOption,sizeof(displayDevice));
+	case '3':
+	  write(displayDevice,selectOptions,sizeof(selectOptions));
+	  write(displayDevice,splashOption,sizeof(splashOption));
+	  break;
+
+	  
+	case '4':
+	  write(displayDevice,selectOptions,sizeof(selectOptions));
+	  write(displayDevice,brightnessLevel,sizeof(brightnessLevel));
 	  break;
 	  
-	case 4:
-	  write(displayDevice,brightness,sizeof(displayDevice));
-	  write(displayDevice,brightnessLevel,sizeof(displayDevice));
-	  break;
-	  
-	case 5:
-	  write(displayDevice,clearDisplay,sizeof(displayDevice));
+	case '5':
+	  write(displayDevice,selectOptions,sizeof(selectOptions));
+	  write(displayDevice,lineTwoSelect,sizeof(lineTwoSelect));
+	  write(displayDevice,clearDisplay,sizeof(clearDisplay));
+	  write(displayDevice,("                                "),32);
 	  break;
 	  
 	default:
@@ -163,8 +281,10 @@ int main (int argc, char **argv)
 	}
       
     }
+ */
   
-  
-  
+  initDevice();
+  sleep(2);
+  clearDisplay();
   return 0;
 }
