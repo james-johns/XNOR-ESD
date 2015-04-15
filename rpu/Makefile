@@ -1,9 +1,10 @@
 
 
-obj-y:=main.o Event.o RPU.o keypad/KeypadDevice.o gstreamer/AudioPlayer.o
+obj-y:=main.o Event.o RPU.o keypad/KeypadDevice.o gstreamer/AudioPlayer.o cddapi/CDDWebApi.o
 
 CROSS_COMPILE?=
 DEBUG?=
+
 
 CC:=$(CROSS_COMPILE)gcc
 CXX:=$(CROSS_COMPILE)g++
