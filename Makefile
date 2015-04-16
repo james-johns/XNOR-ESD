@@ -27,13 +27,21 @@ install-configs: buildroot/Makefile
 save-configs:
 	cp buildroot/.config configs/buildroot.config
 
+buildroot: install-configs
+	make -C buildroot/ all
+
+rpu-build: buildroot
+	make -C rpu/ all CROSS_COMPILE=arm-buildroot-linux-uclibcgnueabi- PKG_CONFIG_SYSROOT_PATH=$(shell pwd)/output/staging/ PATH=$(PATH):$(shell pwd)/buildroot/output/host/usr/bin/
+
+rpu-clean:
+	make -C rpu/ clean
+
 ###
 # General build targets
 ###
-.PHONY: default all clean clean-* rebuild-* FORCE
+.PHONY: default all clean clean-* rebuild-* rpu buildroot FORCE
 
-all: install-configs
-	make -C buildroot/ all
+all: buildroot rpu-build
 
 clean:
 
