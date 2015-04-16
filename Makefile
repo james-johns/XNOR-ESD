@@ -30,12 +30,16 @@ save-configs:
 ###
 # General build targets
 ###
-.PHONY: default all clean clean-* rebuild-*
+.PHONY: default all clean clean-* rebuild-* FORCE
 
 all: install-configs
 	make -C buildroot/ all
 
 clean:
+
+docs:
+	$(Q)mkdir docs/
+	$(Q)doxygen doxyfile
 
 # Any unhandled target can be passed through to buildroot
 %:
