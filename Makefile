@@ -45,7 +45,7 @@ all: buildroot rpu-build
 
 clean:
 
-docs:
+docs: FORCE
 	$(Q)mkdir docs/
 	$(Q)doxygen doxyfile
 
