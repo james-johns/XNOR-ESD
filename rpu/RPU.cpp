@@ -1,4 +1,7 @@
-
+/*!
+ * @file RPU.cpp
+ * @author James Johns
+ */
 #include <stdio.h>
 #include <pthread.h>
 #include <sys/types.h>
@@ -10,9 +13,16 @@
 #include <queue>
 #include <iostream>
 
-
 #include <RPU.h>
 
+
+/*! RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
+ * @author James Johns
+ * @brief RPU constructor
+ *
+ * @param[in] audioThreadEntry function pointer to auidio thread start point
+ * @param[in] ioThreadEntry function pointer to io thread start point
+ */
 RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 {
 	char *ipaddr = NULL;
@@ -43,6 +53,11 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 	running = true;
 }
 
+/*! RPU::~RPU()
+ * @author James Johns
+ * @brief RPU destructor
+ *
+ */
 RPU::~RPU()
 {
 	running = false;
@@ -54,6 +69,13 @@ RPU::~RPU()
 
 }
 
+/*! RPU::tick()
+ * @author James Johns
+ * @brief RPU update tick
+ *
+ * Call iteratively to allow RPU to execute next action.
+ * Handles events sent to the RPU, such as input, stream requests etc.
+ */
 void RPU::tick()
 {
 	Event *evt = getEvent();
@@ -88,11 +110,23 @@ void RPU::tick()
 	}
 }
 
+/*! RPU::sendEvent(Event *evt)
+ * @author James Johns
+ * @brief Send Event to RPU
+ *
+ * @param[in] evt Event to place in event queue
+ */
 void RPU::sendEvent(Event *evt)
 {
 	eventQueue->push(evt);
 }
 
+/*! RPU::getEvent()
+ * @author James Johns
+ * @brief Get event in event queue
+ *
+ * @return Event at front of event queue. Returns NULL if queue is empty.
+ */
 Event *RPU::getEvent()
 {
 	Event *evt = NULL;
@@ -103,6 +137,12 @@ Event *RPU::getEvent()
 	return evt;
 }
 
+/*! RPU::getIPAddress()
+ * @author James Johns
+ * @brief Find the device's current IP address
+ *
+ * @return List of strings containing IP addresses that the device is associated with
+ */
 std::vector<char *> *RPU::getIPAddress()
 {
 	struct ifaddrs *ifAddrs = NULL, *curAddr = NULL;

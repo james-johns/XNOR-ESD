@@ -1,3 +1,10 @@
+/*!
+ * @file RPU.h
+ * @author James Johns
+ * @brief Controller class for RPU system
+ *
+ * Central control class for RPU.
+ */
 
 
 #ifndef _RPU_H_
@@ -10,14 +17,12 @@
 #include <KeypadDevice.h>
 #include <AudioPlayer.h>
 
-enum RPUState_e {
-	LOGIN_PROMPT, 
-	DISPLAY_MENU, 
-	SELECT_LANGUAGE, 
-	SELECT_KNOWLEDGE,
-	REQUEST_STREAM
-};
-
+/*!
+ * @class RPU
+ * @author James Johns
+ * @brief Main controller class for RPU system
+ *
+ */
 class RPU {
 public:
 	RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *));
@@ -28,19 +33,46 @@ public:
 	void sendEvent(Event *evt);
 	Event *getEvent();
 
+
+        /*! RPU::getKeypadDevice
+	 * @author James Johns
+	 * @brief Return current input device.
+	 *
+	 * @return Current input device.
+	 */
 	KeypadDevice *getKeypadDevice() { return keypad; }
 
+        /*! RPU::isRunning()
+	 * @author James Johns
+	 * @brief RPU running state
+	 *
+	 * @return TRUE if RPU is running, FALSE if shutting down or should shutdown.
+	 */
 	bool isRunning() { return running; }
 
 	static std::vector<char *> *getIPAddress();
 
 private:
-	bool running;
-	enum RPUState_e state;
-	std::queue<Event *> *eventQueue;
-	KeypadDevice *keypad;
-	AudioPlayer *player;
-	pthread_t audioThread, ioThread;
+        /*!
+	 * @enum RPUState_e
+	 *
+	 * @brief Enumerator for maintaining RPU state
+	 */
+	enum RPUState_e {
+		LOGIN_PROMPT, /*!< RPU requires PIN to unlock and use */
+		DISPLAY_MENU, /*!< Display global menu */
+		SELECT_LANGUAGE, /*!< Display menu to select language */
+		SELECT_KNOWLEDGE, /*!< Display menu to select Knowledge */
+		REQUEST_STREAM /*!< Request an audio stream from CDD */
+	};
+
+	bool running; /*!< True when RPU is running. False when exiting/should exit. */
+	enum RPUState_e state; /*!< Holds RPU state to determine action on next tick. */
+	std::queue<Event *> *eventQueue; /*!< Event Queue for events sent to RPU. */
+	KeypadDevice *keypad; /*!< Input device object. Must not be NULL */
+	AudioPlayer *player; /*!< Audio player object. NULL if no audio currently playing. */
+	pthread_t audioThread, /*!< pthread handle the Audio thread */
+		  ioThread; /*!< pthread handles for IO thread */
 };
 
 #endif

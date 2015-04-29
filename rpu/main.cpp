@@ -94,6 +94,13 @@ void *ioThreadEntry(void *arg)
 	return NULL;
 }
 
+
+/**
+ * /fn main(int argc, char **argv)
+ * /author James Johns
+ *
+ *
+ */
 int main(int argc, char **argv)
 {
 	/* Initialise required libraries */
