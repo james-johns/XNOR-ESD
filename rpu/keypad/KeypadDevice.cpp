@@ -209,6 +209,15 @@ char KeypadDevice::getKeyPressed()
 	return temp;
 }
 
+void KeypadDevice::update()
+{
+	static int col = 0;
+	update(col);
+	col += 1;
+	if (col >= 4)
+		col = 0;
+}
+
 //Refresh 7 segs and scan keypad
 void KeypadDevice::update(int column)
 {

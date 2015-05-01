@@ -14,6 +14,8 @@
 #include <iostream>
 
 #include <RPU.h>
+#include <KeypadDevice.h>
+#include <KeyboardDevice.h>
 
 
 /*! RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
@@ -36,11 +38,19 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 			delete *it;
 	}
 	delete addresses;
-	eventQueue = new std::queue<Event *>();
-	keypad = new KeypadDevice();	
 	player = new AudioPlayer(ipaddr);
 	delete ipaddr;
+
+	/* Create input device as a keypad. If this fails, default to keyboard instead */
+	input = new KeypadDevice();
+	if (input->isConnected() == false) { // if keypad is not connected, fallback to keyboard
+		delete input;
+		input = new KeyboardDevice();
+	}
 	state = LOGIN_PROMPT;
+
+	/*! Event queue must be initialised before threads as they depend on sending events to RPU */
+	eventQueue = new std::queue<Event *>();
 
 	/* Create threads */
 	if (pthread_create(&audioThread, NULL, audioThreadEntry, player) != 0) {
@@ -65,7 +75,7 @@ RPU::~RPU()
 	pthread_join(ioThread, NULL);
 	pthread_join(audioThread, NULL);
 	delete player;
-	delete keypad;
+	delete input;
 
 }
 
@@ -78,10 +88,10 @@ RPU::~RPU()
  */
 void RPU::tick()
 {
-	Event *evt = getEvent();
-	if (evt != NULL) {
+	Event *evt;
+	while ((evt = getEvent()) != NULL) {
 		switch (evt->getType()) {
-		case KEYPAD_INPUT:
+		case Event::KEYPAD_INPUT:
 			switch (*(char *)evt->getArguments()) {
 			case 'p':
 				player->playpause();
@@ -92,10 +102,10 @@ void RPU::tick()
 			case 'q':
 				running = false;
 				break;
-			case 'w':
-			case 's':
-			case 'f':
-			case 'c':
+			case 'w':/*!< Up key */
+			case 's':/*!< Down key */
+			case 'f':/*!< Enter key */
+			case 'c':/*!< Cancel key */
 			case '1' ... '9':
 				fprintf(stderr, "Input not handled yet\n");
 				break;
@@ -103,6 +113,9 @@ void RPU::tick()
 				fprintf(stderr, "RPU::tick: Unknown input\n");
 				break;
 			}
+			break;
+		case Event::QUIT:
+			running = false;
 			break;
 		default:
 			break;

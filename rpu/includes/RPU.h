@@ -14,7 +14,7 @@
 #include <queue>
 
 #include <Event.h>
-#include <KeypadDevice.h>
+#include <InputDevice.h>
 #include <AudioPlayer.h>
 
 /*!
@@ -34,13 +34,13 @@ public:
 	Event *getEvent();
 
 
-        /*! RPU::getKeypadDevice
+        /*! RPU::getInputDevice
 	 * @author James Johns
 	 * @brief Return current input device.
 	 *
 	 * @return Current input device.
 	 */
-	KeypadDevice *getKeypadDevice() { return keypad; }
+	InputDevice *getInputDevice() { return input; }
 
         /*! RPU::isRunning()
 	 * @author James Johns
@@ -69,7 +69,7 @@ private:
 	bool running; /*!< True when RPU is running. False when exiting/should exit. */
 	enum RPUState_e state; /*!< Holds RPU state to determine action on next tick. */
 	std::queue<Event *> *eventQueue; /*!< Event Queue for events sent to RPU. */
-	KeypadDevice *keypad; /*!< Input device object. Must not be NULL */
+	InputDevice *input; /*!< Input device object. Must not be NULL */
 	AudioPlayer *player; /*!< Audio player object. NULL if no audio currently playing. */
 	pthread_t audioThread, /*!< pthread handle the Audio thread */
 		  ioThread; /*!< pthread handles for IO thread */

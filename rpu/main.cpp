@@ -49,47 +49,25 @@ void *ioThreadEntry(void *arg)
 {
 	char *c;
 	RPU *prog = (RPU *)arg;
-	KeypadDevice *keypad = prog->getKeypadDevice();
-	if (keypad->isConnected()) {
+	InputDevice *input = prog->getInputDevice();
+	if (input->isConnected()) {
 		do {
 			for (int i = 0; i < 4; i++) {
-				keypad->update(i);
+				input->update();
 				c = new char;
-				*c = keypad->getKeyPressed();
+				*c = input->getKeyPressed();
 				if (*c == '\n')
 					delete c;
 				else if (*c)
-					prog->sendEvent(new Event(KEYPAD_INPUT, c));
+					prog->sendEvent(new Event(Event::KEYPAD_INPUT, c));
 				else
 					delete c;
-		}
-		} while (prog->isRunning());
-	} else {
-
-		fd_set fds;
-		struct timeval tv;
-		do {
-			tv.tv_sec = 0;
-			tv.tv_usec = 0;
-			FD_ZERO(&fds);
-			FD_SET(fileno(stdin), &fds);
-
-			if (select(1, &fds, NULL, NULL, &tv) > 0) {
-				c = new char;
-				scanf("%c", c);
-
-				if (*c == '\n') {
-					delete c;
-				} else {
-					printf("Input: %c\n", *c);
-					prog->sendEvent(new Event(KEYPAD_INPUT, c));
-				}
-			} else {
-				usleep(100);
 			}
 		} while (prog->isRunning());
+	} else {
+		fprintf(stderr, "No input device connected\n");
+		prog->sendEvent(new Event(Event::QUIT, NULL)); // send event to quit application
 	}
-	//	prog->sendEvent(new Event(QUIT, NULL)); // send event to quit application
 
 	return NULL;
 }
