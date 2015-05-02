@@ -2,7 +2,7 @@
 
 #include <LCDDisplay.h>
 
-LCDDisplay::LCDDisplay()
+LCDDisplay::LCDDisplay() : Display()
 {
 
 }
