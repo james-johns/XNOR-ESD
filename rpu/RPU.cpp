@@ -16,6 +16,7 @@
 #include <RPU.h>
 #include <KeypadDevice.h>
 #include <KeyboardDevice.h>
+#include <NCursesDisplay.h>
 
 
 /*! RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
@@ -30,8 +31,6 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 	char *ipaddr = NULL;
 	std::vector<char *> *addresses = getIPAddress();
 	for (std::vector<char *>::iterator it = addresses->begin(); it != addresses->end(); it++) {
-		std::cout << "Found IP Address: " << *it << std::endl;
-
 		if (strncmp("127", *it, 3) != 0 && ipaddr == NULL)
 			ipaddr = *it;
 		else
@@ -48,6 +47,7 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 		input = new KeyboardDevice();
 	}
 	state = LOGIN_PROMPT;
+	display = new NCursesDisplay();
 
 	/*! Event queue must be initialised before threads as they depend on sending events to RPU */
 	eventQueue = new std::queue<Event *>();
@@ -76,7 +76,7 @@ RPU::~RPU()
 	pthread_join(audioThread, NULL);
 	delete player;
 	delete input;
-
+	delete display;
 }
 
 /*! RPU::tick()
@@ -107,10 +107,8 @@ void RPU::tick()
 			case 'f':/*!< Enter key */
 			case 'c':/*!< Cancel key */
 			case '1' ... '9':
-				fprintf(stderr, "Input not handled yet\n");
 				break;
 			default:
-				fprintf(stderr, "RPU::tick: Unknown input\n");
 				break;
 			}
 			break;

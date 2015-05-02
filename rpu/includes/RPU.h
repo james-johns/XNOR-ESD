@@ -16,6 +16,8 @@
 #include <Event.h>
 #include <InputDevice.h>
 #include <AudioPlayer.h>
+#include <Display.h>
+
 
 /*!
  * @class RPU
@@ -41,6 +43,7 @@ public:
 	 * @return Current input device.
 	 */
 	InputDevice *getInputDevice() { return input; }
+	Display *getDisplay() { return display; }
 
         /*! RPU::isRunning()
 	 * @author James Johns
@@ -70,6 +73,7 @@ private:
 	enum RPUState_e state; /*!< Holds RPU state to determine action on next tick. */
 	std::queue<Event *> *eventQueue; /*!< Event Queue for events sent to RPU. */
 	InputDevice *input; /*!< Input device object. Must not be NULL */
+	Display *display; /*!< Display device object. Must not be NULL */
 	AudioPlayer *player; /*!< Audio player object. NULL if no audio currently playing. */
 	pthread_t audioThread, /*!< pthread handle the Audio thread */
 		  ioThread; /*!< pthread handles for IO thread */

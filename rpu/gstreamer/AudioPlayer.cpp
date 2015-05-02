@@ -21,7 +21,6 @@ AudioPlayer::AudioPlayer(const char *ipaddr)
 	std::string pipelineString = "tcpserversrc host=";
 	pipelineString += (ipaddr != NULL) ? ipaddr : "127.0.0.1";
 	pipelineString += " port=3000 ! decodebin ! audioconvert ! alsasink";
-	std::cout << "Using pipeline: " << pipelineString << std::endl;
 	pipeline = gst_parse_launch(pipelineString.c_str(), NULL);
 	gst_element_set_state(pipeline, GST_STATE_PAUSED);
 
@@ -36,6 +35,7 @@ AudioPlayer::AudioPlayer(const char *ipaddr)
  */
 AudioPlayer::~AudioPlayer()
 {
+	stop(); /*!< Stop playing audio before unreferencing pipeline */
 	gst_element_set_state(pipeline, GST_STATE_NULL);
 	gst_object_unref(pipeline);
 }
@@ -49,7 +49,6 @@ AudioPlayer::~AudioPlayer()
  */
 void AudioPlayer::run()
 {
-	std::cout << "Running AudioPlayer" << std::endl;
 	g_main_loop_run(loop);
 }
 

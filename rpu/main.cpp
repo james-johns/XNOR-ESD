@@ -8,6 +8,7 @@
 #include <gst/gst.h>
 #include <pthread.h>
 #include <curl/curl.h>
+#include <curses.h>
 
 #include <KeypadDevice.h>
 #include <AudioPlayer.h>
@@ -30,9 +31,6 @@ void initGST(int *argc, char ***argv)
 	else
 		nano_str = "";
 
-	printf ("This program is linked against GStreamer %d.%d.%d %s\n",
-		major, minor, micro, nano_str);
-
 }
 
 // Thread for handling audio content
@@ -40,7 +38,6 @@ void *audioThreadEntry(void *arg)
 {
 	AudioPlayer *player = (AudioPlayer *)arg;
 	player->run();
-	std::cout << "Returning from audioThreadEntry" << std::endl;
 	return NULL;
 }
 
@@ -50,7 +47,12 @@ void *ioThreadEntry(void *arg)
 	char *c;
 	RPU *prog = (RPU *)arg;
 	InputDevice *input = prog->getInputDevice();
-	if (input->isConnected()) {
+	Display * display = prog->getDisplay();
+	if (!input->isConnected()) {
+		prog->sendEvent(new Event(Event::QUIT, NULL)); // send event to quit application
+	} else if (display == NULL) {
+		fprintf(stderr, "No display device");
+	} else {
 		do {
 			for (int i = 0; i < 4; i++) {
 				input->update();
@@ -63,10 +65,8 @@ void *ioThreadEntry(void *arg)
 				else
 					delete c;
 			}
+			display->refresh();
 		} while (prog->isRunning());
-	} else {
-		fprintf(stderr, "No input device connected\n");
-		prog->sendEvent(new Event(Event::QUIT, NULL)); // send event to quit application
 	}
 
 	return NULL;
@@ -74,8 +74,8 @@ void *ioThreadEntry(void *arg)
 
 
 /**
- * /fn main(int argc, char **argv)
- * /author James Johns
+ * @fn main(int argc, char **argv)
+ * @author James Johns
  *
  *
  */
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 	curl_global_cleanup();
 	libusb_exit(NULL);
 	gst_deinit();
-
+	endwin();
 	return 0;
 }
 

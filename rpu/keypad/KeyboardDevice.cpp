@@ -30,7 +30,6 @@ void KeyboardDevice::update()
 		scanf("%c", &c);
 		
 		if (c != '\n') {
-			printf("Input: %c\n", c);
 			lastKeyPressed = c;
 		}
 	}
