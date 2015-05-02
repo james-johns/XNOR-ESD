@@ -1,6 +1,6 @@
 
 
-obj-y:=main.o Event.o RPU.o keypad/KeypadDevice.o gstreamer/AudioPlayer.o cddapi/CDDWebApi.o keypad/KeyboardDevice.o display/LCDDisplay.o display/Display.o
+obj-y:=main.o Event.o RPU.o keypad/KeypadDevice.o gstreamer/AudioPlayer.o cddapi/CDDWebApi.o keypad/KeyboardDevice.o display/LCDDisplay.o display/Display.o display/NCursesDisplay.o
 
 CROSS_COMPILE?=
 DEBUG?=
@@ -10,8 +10,8 @@ CC:=$(CROSS_COMPILE)gcc
 CXX:=$(CROSS_COMPILE)g++
 LD:=$(CXX)
 CFLAGS?=`pkg-config libusb-1.0 --cflags` $(DEBUG)
-CXXFLAGS?=`pkg-config gstreamer-1.0 --cflags` `pkg-config libusb-1.0 --cflags` -I./includes $(DEBUG)
-LDFLAGS?=-lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lusb-1.0 -lpthread -lcurl
+CXXFLAGS?=`pkg-config gstreamer-1.0 --cflags` `pkg-config libusb-1.0 --cflags` `pkg-config ncurses --cflags` -I./includes $(DEBUG)
+LDFLAGS?=-lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lusb-1.0 -lpthread -lcurl -lncurses
 
 .PHONY: all clean rpuclient
 
