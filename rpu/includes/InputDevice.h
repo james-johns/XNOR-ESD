@@ -7,9 +7,9 @@
 class InputDevice {
 public:
 
-	virtual char getKeyPressed(void) {}
-	virtual void update() {}
-	virtual bool isConnected() {}
+	virtual char getKeyPressed(void) = 0;
+	virtual void update() = 0;
+	virtual bool isConnected() = 0;
 
 };
 
