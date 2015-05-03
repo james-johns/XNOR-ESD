@@ -48,7 +48,7 @@ void *ioThreadEntry(void *arg)
 	RPU *prog = (RPU *)arg;
 	InputDevice *input = prog->getInputDevice();
 	Display * display = prog->getDisplay();
-	if (!input->isConnected()) {
+	if (input == NULL || !input->isConnected()) {
 		prog->sendEvent(new Event(Event::QUIT, NULL)); // send event to quit application
 	} else if (display == NULL) {
 		fprintf(stderr, "No display device");
