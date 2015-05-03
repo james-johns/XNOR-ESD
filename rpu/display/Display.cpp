@@ -6,10 +6,10 @@
 
 Display::Display()
 {
-	setMenuString(NULL);
-	setTrackInfoString(NULL);
-	setPlaybackString(NULL);
-	displayError(NULL);
+	menuString = NULL; menuDirty = true;
+	trackInfoString = NULL; trackInfoDirty = true;
+	playbackString = NULL; playbackDirty = true;
+	errorString = NULL; errorDirty = true;
 }
 
 Display::~Display()
