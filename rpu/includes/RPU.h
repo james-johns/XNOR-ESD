@@ -17,6 +17,7 @@
 #include <InputDevice.h>
 #include <AudioPlayer.h>
 #include <Display.h>
+#include <Menu.hpp>
 
 
 /*!
@@ -77,6 +78,7 @@ private:
 	AudioPlayer *player; /*!< Audio player object. NULL if no audio currently playing. */
 	pthread_t audioThread, /*!< pthread handle the Audio thread */
 		  ioThread; /*!< pthread handles for IO thread */
+	Menu *mainMenu;
 };
 
 #endif

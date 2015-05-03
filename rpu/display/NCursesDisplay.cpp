@@ -24,18 +24,22 @@ NCursesDisplay::~NCursesDisplay()
 void NCursesDisplay::refresh()
 {
 	if (menuDirty) {
-		wprintw(menuWin, "\nMenu");
+		wclear(menuWin);
+		wprintw(menuWin, menuString);
 		wrefresh(menuWin);
 		menuDirty = false;
 	}
 	if (playbackDirty) {
-		wprintw(playWin, "\nPlay");
+		wclear(playWin);
+		wprintw(playWin, playbackString);
 		wrefresh(playWin);
 		playbackDirty = false;
 	}
 	if (trackInfoDirty) {
-		wprintw(trackWin, "\nTrack");
+		wclear(trackWin);
+		wprintw(trackWin, trackInfoString);
 		wrefresh(trackWin);
 		trackInfoDirty = false;
 	}
+	wrefresh(stdscr);
 }

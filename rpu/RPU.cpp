@@ -17,7 +17,7 @@
 #include <KeypadDevice.h>
 #include <KeyboardDevice.h>
 #include <NCursesDisplay.h>
-
+#include <Menu.hpp>
 
 /*! RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
  * @author James Johns
@@ -39,6 +39,11 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 	delete addresses;
 	player = new AudioPlayer(ipaddr);
 	delete ipaddr;
+
+	mainMenu = new Menu();
+	mainMenu->addMenuItem("Enter Exhibit");
+	mainMenu->addMenuItem("Change Language");
+	mainMenu->addMenuItem("Change Knowledge Level");
 
 	/* Create input device as a keypad. If this fails, default to keyboard instead */
 	input = new KeypadDevice();
@@ -94,16 +99,27 @@ void RPU::tick()
 		case Event::KEYPAD_INPUT:
 			switch (*(char *)evt->getArguments()) {
 			case 'p':
-				player->playpause();
+				if (player != NULL) {
+					player->playpause();
+					display->setPlaybackString((char *)((player->isPlaying()) ? "Play" : "Pause"));
+				}
 				break;
 			case 'r':
-				player->rewind();
+				if (player != NULL) {
+					player->rewind();
+				}
 				break;
 			case 'q':
 				running = false;
 				break;
 			case 'w':/*!< Up key */
+				mainMenu->up();
+				display->setMenuString((char *) mainMenu->getCurrentMenuItem());
+				break;
 			case 's':/*!< Down key */
+				mainMenu->down();
+				display->setMenuString((char *) mainMenu->getCurrentMenuItem());
+				break;
 			case 'f':/*!< Enter key */
 			case 'c':/*!< Cancel key */
 			case '1' ... '9':
@@ -180,5 +196,4 @@ std::vector<char *> *RPU::getIPAddress()
 
 	return toRet;
 }
-
 
