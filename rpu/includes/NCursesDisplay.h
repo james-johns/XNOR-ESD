@@ -14,7 +14,7 @@ public:
 
 	void refresh();
 private:
-	WINDOW *menuWin, *trackWin, *playWin;
+	WINDOW *menuWin, *trackWin, *playWin, *errorWin;
 };
 
 #endif
