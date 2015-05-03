@@ -14,7 +14,7 @@ LCDDisplay::~LCDDisplay()
 
 void LCDDisplay::refresh()
 {
-  char displayOptionMode[1] = {254};//Special character to enable option mode
+  /* char displayOptionMode[1] = {254};//Special character to enable option mode
   char blockNumber1[1]={128};//first character of the display
   char blockNumber2[1]={129};//2nd character of the display
   char blockNumber3[1]={137};//10th character of the display
@@ -36,5 +36,6 @@ void LCDDisplay::refresh()
   write(displayDevice,displayOptionMode,sizeof(displayOptionMode));
   write(displayDevice,blockNumber5,sizeof(blockNumber5));
   write(displayDevice,displayContent5,sizeof(displayContent5));
+  */
 }
 
