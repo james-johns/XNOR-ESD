@@ -8,15 +8,17 @@ public:
 	Display();
 	~Display();
 
-	void setPlaybackString(char *str) { playbackString = str; playbackDirty = true; }
-	void setMenuString(char *str) { menuString = str; menuDirty = true; }
-	void setTrackInfoString(char *str) { trackInfoString = str; trackInfoDirty = true; }
+	void setPlaybackString(const char *str) { playbackString = str; playbackDirty = true; }
+	void setMenuString(const char *str) { menuString = str; menuDirty = true; }
+	void setTrackInfoString(const char *str) { trackInfoString = str; trackInfoDirty = true; }
+	void displayError(const char *str) { errorString = str; }
 
 	virtual void refresh() = 0; /*!< Use to update display device */
 protected:
-	char *playbackString;
-	char *menuString;
-	char *trackInfoString;
+	const char *playbackString;
+	const char *menuString;
+	const char *trackInfoString;
+	const char *errorString;
 	bool playbackDirty, menuDirty, trackInfoDirty;
 };
 
