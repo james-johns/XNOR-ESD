@@ -52,7 +52,10 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 		input = new KeyboardDevice();
 	}
 	state = LOGIN_PROMPT;
+
+	// connect to NCurses display by default
 	display = new NCursesDisplay();
+	display->displayError("Please enter PIN to unlock");
 
 	/*! Event queue must be initialised before threads as they depend on sending events to RPU */
 	eventQueue = new std::queue<Event *>();
@@ -96,44 +99,29 @@ void RPU::tick()
 	Event *evt;
 	while ((evt = getEvent()) != NULL) {
 		switch (evt->getType()) {
-		case Event::KEYPAD_INPUT:
-			switch (*(char *)evt->getArguments()) {
-			case 'p':
-				if (player != NULL) {
-					player->playpause();
-					display->setPlaybackString((char *)((player->isPlaying()) ? "Play" : "Pause"));
-				}
+		case Event::QUIT:
+			running = false;
+			break;
+		default:
+			switch (state) {
+			case LOGIN_PROMPT:
+				loginPrompt(evt);
 				break;
-			case 'r':
-				if (player != NULL) {
-					player->rewind();
-				}
+			case DISPLAY_MENU:
+				displayMenu(evt);
 				break;
-			case 'q':
-				running = false;
+			case SELECT_LANGUAGE:
+				selectLanguage(evt);
 				break;
-			case 'w':/*!< Up key */
-				mainMenu->up();
-				display->setMenuString((char *) mainMenu->getCurrentMenuItem());
-				break;
-			case 's':/*!< Down key */
-				mainMenu->down();
-				display->setMenuString((char *) mainMenu->getCurrentMenuItem());
-				break;
-			case 'f':/*!< Enter key */
-			case 'c':/*!< Cancel key */
-			case '1' ... '9':
+			case SELECT_KNOWLEDGE:
+				selectKnowledge(evt);
 				break;
 			default:
 				break;
 			}
 			break;
-		case Event::QUIT:
-			running = false;
-			break;
-		default:
-			break;
 		}
+		delete evt;
 	}
 }
 
@@ -197,3 +185,208 @@ std::vector<char *> *RPU::getIPAddress()
 	return toRet;
 }
 
+void RPU::loginPrompt(Event *evt)
+{
+	display->displayError("Please enter PIN to unlock");
+	switch (evt->getType()) {
+	case Event::KEYPAD_INPUT:
+		switch (*(char *)evt->getArguments()) {
+		case 'q':
+			running = false;
+			break;
+		case 'c':/*!< Enter key */
+			/* enter selected menu entry */
+			state = DISPLAY_MENU;
+			display->setMenuString(mainMenu->getCurrentMenuItem());
+			display->displayError(NULL);
+			break;
+		case '1' ... '9':
+			/* capture PIN input */
+			break;
+		case 'p':/*!< play */
+		case 'r':/*!< rewind */
+		case 'f':/*!< Fast Forward */
+		case 'w':/*!< Up key */
+		case 's':/*!< Down key */
+		default:
+			/* ignored */
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void RPU::displayMenu(Event *evt)
+{
+	switch (evt->getType()) {
+	case Event::KEYPAD_INPUT:
+		switch (*(char *)evt->getArguments()) {
+		case 'p':
+			if (player != NULL) {
+				player->playpause();
+				display->setPlaybackString(((player->isPlaying()) ? "Play" : "Pause"));
+			}
+			break;
+		case 'r':
+			if (player != NULL) {
+				player->rewind();
+			}
+			break;
+		case 'f': /*!< Fast Forward */
+			/* TODO: fast forward audio player */
+			break;
+		case 'q':
+			state = LOGIN_PROMPT;
+			display->displayError("Please enter PIN to unlock");
+			display->setMenuString(NULL);
+			display->setPlaybackString(NULL);
+			display->setTrackInfoString(NULL);
+			break;
+		case 'w':/*!< Up key */
+			mainMenu->up();
+			display->setMenuString(mainMenu->getCurrentMenuItem());
+			break;
+		case 's':/*!< Down key */
+			mainMenu->down();
+			display->setMenuString(mainMenu->getCurrentMenuItem());
+			break;
+		case 'c':/*!< Enter (continue) key */
+			/* Enter selected menu entry */
+			break;
+		case '1' ... '9':
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void RPU::selectLanguage(Event *evt)
+{
+	switch (evt->getType()) {
+	case Event::KEYPAD_INPUT:
+		switch (*(char *)evt->getArguments()) {
+		case 'p':
+			if (player != NULL) {
+				player->playpause();
+				display->setPlaybackString((char *)((player->isPlaying()) ? "Play" : "Pause"));
+			}
+			break;
+		case 'r':
+			if (player != NULL) {
+				player->rewind();
+			}
+			break;
+		case 'f': /*!< Fast Forward */
+			/* TODO: fast forward audio player */
+			break;
+		case 'q':
+			state = DISPLAY_MENU;
+			break;
+		case 'w':/*!< Up key */
+			mainMenu->up();
+			display->setMenuString((char *) mainMenu->getCurrentMenuItem());
+			break;
+		case 's':/*!< Down key */
+			mainMenu->down();
+			display->setMenuString((char *) mainMenu->getCurrentMenuItem());
+			break;
+		case 'c':/*!< Cancel key */
+			/* leave menu */
+			break;
+		case '1' ... '9':
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void RPU::selectKnowledge(Event *evt)
+{
+	switch (evt->getType()) {
+	case Event::KEYPAD_INPUT:
+		switch (*(char *)evt->getArguments()) {
+		case 'p':
+			if (player != NULL) {
+				player->playpause();
+				display->setPlaybackString((char *)((player->isPlaying()) ? "Play" : "Pause"));
+			}
+			break;
+		case 'r':
+			if (player != NULL) {
+				player->rewind();
+			}
+			break;
+		case 'f':/*!< Fast Forward */
+			/* TODO: fast forward audio player */
+			break;
+		case 'q':
+			state = DISPLAY_MENU;
+			break;
+		case 'c':/*!< Enter key */
+			/* TODO: select language and return to menu */
+			break;
+		case 'w':/*!< Up key */
+			mainMenu->up();
+			display->setMenuString((char *) mainMenu->getCurrentMenuItem());
+			break;
+		case 's':/*!< Down key */
+			mainMenu->down();
+			display->setMenuString((char *) mainMenu->getCurrentMenuItem());
+			break;
+		case '1' ... '9':
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void RPU::requestStream(Event *evt)
+{
+	switch (evt->getType()) {
+	case Event::KEYPAD_INPUT:
+		switch (*(char *)evt->getArguments()) {
+		case 'p':
+			if (player != NULL) {
+				player->playpause();
+				display->setPlaybackString((char *)((player->isPlaying()) ? "Play" : "Pause"));
+			}
+			break;
+		case 'r':
+			if (player != NULL) {
+				player->rewind();
+			}
+			break;
+		case 'f':/*!< Fast Forward */
+			/* TODO: fast forward audio player */
+			break;
+		case 'q': /* cancel key - return to menu */
+			state = DISPLAY_MENU;
+			break;
+		case 'c':/*!< Enter key */
+			/* TODO: Request stream using last 4 digits input */
+			break;
+		case '1' ... '9':
+			/* TODO: Capture Exhibit ID input */
+			break;
+		case 'w':/*!< Up key */
+		case 's':/*!< Down key */
+		default:
+			// Unused
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+}

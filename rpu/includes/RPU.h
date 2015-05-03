@@ -79,6 +79,12 @@ private:
 	pthread_t audioThread, /*!< pthread handle the Audio thread */
 		  ioThread; /*!< pthread handles for IO thread */
 	Menu *mainMenu;
+
+	void loginPrompt(Event *evt);
+	void displayMenu(Event *evt);
+	void selectLanguage(Event *evt);
+	void selectKnowledge(Event *evt);
+	void requestStream(Event *evt);
 };
 
 #endif
