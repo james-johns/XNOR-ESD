@@ -5,15 +5,19 @@
 
 CDDWebApi::CDDWebApi(const char *cddIPAddr)
 {
-  size_t ipLength = strlen(cddIPAddr);
-  ipaddr = (char*)malloc(sizeof(char) * (ipLength + 1)); // IP Address must include null terminator
-  strncpy(ipaddr, cddIPAddr, strlen(cddIPAddr));
+	size_t ipLength = strlen(cddIPAddr);
+
+	// IP Address must include null terminator
+	ipaddr = (char*)malloc(sizeof(char) * (ipLength + 1)); 
+	strncpy(ipaddr, cddIPAddr, strlen(cddIPAddr));
+	cdd = curl_easy_init();
 }
 
 CDDWebApi::~CDDWebApi()
 {
-  free(ipaddr);
-  ipaddr = NULL;
+	free(ipaddr);
+	ipaddr = NULL;
+	curl_easy_cleanup (cdd);
 }
 
 /**
@@ -30,53 +34,48 @@ CDDWebApi::~CDDWebApi()
  */
 size_t writeToString (void *ptr, size_t size, size_t count, void *stream)
 {
-  using namespace std;
-  ((string*)stream)->append((char*)ptr,0,size*count);
-  return size*count;
+	((std::string*)stream)->append((char*)ptr,0,size*count);
+	return size*count;
 }
 
 
-void CDDWebApi::login(char pin[4])
+int CDDWebApi::login(char pin[4])
 {
+	// Check initialisation was successfull
+	if (!cdd)
+		return -1;
 
-  // Check if curl has been initialised
-  if (!cdd)
-    {
-      cdd = curl_easy_init();
-    }
+	// Configure libCuRL to output response to a string
+	std::string toSend, response;
+	curl_easy_setopt (cdd, CURLOPT_WRITEFUNCTION, writeToString);
+	curl_easy_setopt (cdd, CURLOPT_WRITEDATA, &response);
+	
+	// Construct a string to request a login
+	toSend = "http://";
+	toSend += ipaddr;
+	toSend += ":8080/api.cgi?&loginflag=1&pin=";
+	toSend += pin;
+      
+	// Send login request
+	curl_easy_setopt (cdd, CURLOPT_URL, toSend.c_str());
+	curl_easy_perform(cdd);
 
-  // Check initialisation was successfull
-  if (cdd)
-    {
-      // Construct & send message
-      std::string toSend, response;
-      curl_easy_setopt (cdd, CURLOPT_WRITEFUNCTION, writeToString);
-      curl_easy_setopt (cdd, CURLOPT_WRITEDATA, &response);
-
-      toSend = "http://";
-      toSend += ipaddr;
-      toSend += ":8080/api.cgi?&loginflag=1&pin=";
-      toSend += pin;
-
-      curl_easy_setopt (cdd, CURLOPT_URL, toSend.c_str());
-      curl_easy_perform(cdd);
-
-      // Check response
-      size_t firstLine = response.find ("\n");
-      if (response.substr (0, firstLine).compare ("HTTP/1.1 200 OK")==0)
-	{
-	  // Auth Successful, copy token
-	  strncpy (token, response.substr(firstLine+1, firstLine+6).c_str(), 5);
-	}
-      else
-	{
-	  // failed
+	// Check response
+	size_t firstLine = response.find ("\n");
+	if (response.substr (0, firstLine).compare ("HTTP/1.1 200 OK")==0) {
+		// Auth Successful, copy token
+		strncpy (token, response.substr
+			 (firstLine+1, firstLine+6).c_str(), 5);
+		return 0;
+	} else {
+		// failed
+		return -1;
 	}     
-    }
+	
 }
 void CDDWebApi::logout()
 {
-  curl_easy_cleanup (cdd);
+
 }
 
 void CDDWebApi::requestAudioStream(char trackID[4], int language, int knowledgeLevel)

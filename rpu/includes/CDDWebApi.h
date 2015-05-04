@@ -12,7 +12,7 @@ public:
 	CDDWebApi(const char *cddIPAddr);
 	~CDDWebApi();
 
-	void login(char pin[4]);
+	int login(char pin[4]);
 	void logout();
 
 	void requestAudioStream(char trackID[4], int language, int knowledgeLevel);
