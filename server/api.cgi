@@ -16,8 +16,10 @@ if ($remote_addr eq "") {
 ### Functions
 
 sub login
-{  
-  print "@_  --> login <br>";
+{ 
+  # Finds and returns the "pin"
+  my $temp = &parse(\@REQ_ARG, 'pin');
+  print "$temp <br>";
 }
 
 sub logout
@@ -65,6 +67,24 @@ sub streamTrack
   print "@_  --> streamTrack <br>";
 }
 
+sub parse
+{
+  my $match;
+  my @reqArg = @{@_[0]};
+  my $searchArg = @_[1];  
+
+  foreach (@reqArg)
+  {
+    if ( ( $_ =~ /$searchArg/ ) )
+    {
+      $match = $_;
+      last;
+    }
+  }
+  
+  return $match;
+}
+
 ### Main program flow
 my $q = CGI->new();
 
@@ -84,7 +104,7 @@ foreach my $index (0 .. $#REQ_ARG)
     my @TEMP = split(/=/, $REQ_ARG[$index]);
     $MAINREQ = $TEMP[0];
     $MAINARG = $TEMP[1];
-    delete $REQ_ARG[$index];
+    splice @REQ_ARG, $index, 1;
     last;
   }
 }
