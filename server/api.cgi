@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 
 use CGI;
+use DBI;
+use Switch;
 
 ### Environment variable definitions
 $logfile='./gstreamer.log';
@@ -13,75 +15,115 @@ if ($remote_addr eq "") {
 
 ### Functions
 
-## Audio stream functions
-# stream_audio_track(file_name, target_ip)
-sub stream_audio_track
-{
-    my $file      = $audio_base_path . @_[0];
-    my $target_ip = @_[1];
-    my $pid = 0;
-    if (-e $file) {
-	if (($pid = fork()) == 0) {
-	    close(STDOUT);
-	    close(STDERR);
-	    open(STDOUT, ">", $logfile);
-	    open(STDERR, ">", $logfile);
-	    exec("gst-launch-1.0", "filesrc", "location=$file", "!", 
-		 "tcpclientsink", "host=$target_ip", "port=3000");
-	    exit;
-	} else {
-	    print "gst-launch-1.0 filesrc location=$file ! ";
-	    print "tcpclientsink host=$target_ip port=3000<br />\n";
-	}
-    } else {
-	print "\n\nAudio track does not exist\n";
-    }
-    return $pid;
+sub login
+{  
+  print "@_  --> login <br>";
 }
 
-## Database communication functions
-# get_track_name_by_id(track_id)
-# returns string containing track file name
-sub get_track_name_by_id
+sub logout
 {
-    my $id = @_[0];
-    my $track_name;
-    if ($id eq "0001") {
-	$track_name = "test2.ogg";
-    }
-    return $track_name;
+  print "@_  --> logout <br>";
+}
+
+sub addUser
+{
+  print "@_  --> addUser <br>";
+}
+
+sub completePayment
+{
+  print "@_  --> completePayment <br>";
+}
+
+sub findUser
+{
+  print "@_  --> findUser <br>";
+}
+
+sub editUser
+{
+  print "@_  --> editUser <br>";
+}
+
+sub deleteUser
+{
+  print "@_  --> deleteUser <br>";
+}
+
+sub addTrack
+{
+  print "@_  --> addTrack <br>";
+}
+
+sub deleteTrack
+{
+  print "@_  --> deleteTrack <br>";
+}
+
+sub streamTrack
+{
+  print "@_  --> streamTrack <br>";
 }
 
 ### Main program flow
 my $q = CGI->new();
+
+### Parsing a HTTP Request, QUERY_STRING
+### is a environment variable passed by the Apachi Web Server
+### split separates the string according to a specified delimiter "&"
+###
+### It then separates the array into two arrays both sides of the "=" delimiter
+@REQ_ARG = split (/&/, "$ENV{'QUERY_STRING'}");
+$MAINREQ;
+$MAINARG;
+
+foreach my $index (0 .. $#REQ_ARG)
+{
+  if ( ( @REQ_ARG[$index] =~ /action/) || (@REQ_ARG[$index] =~ /token/) )
+  {
+    my @TEMP = split(/=/, $REQ_ARG[$index]);
+    $MAINREQ = $TEMP[0];
+    $MAINARG = $TEMP[1];
+    delete $REQ_ARG[$index];
+    last;
+  }
+}
+
 print $q->header(), $q->start_html();
 
-print "<h1>Museum Audio Guide Web API</h1>\n";
-
-my $apikey = $q->param('key');
-my $trackid = $q->param('trackid');
-
-print "|";
-print "$remote_addr";
-print "|";
-print "\nAPI key: $apikey<br />\n";
-print "Client IP: $remote_addr<br />\n";
-print "Track ID: $trackid<br />\n";
-
-if ($apikey == 1234) {
-    my $track_name = get_track_name_by_id($trackid);
-    if ($track_name ne "") {
-	my $pid = stream_audio_track($track_name, $remote_addr);
-	if ($pid) {
-	    print "\n\nAudio stream has begun<br />\n";
-	} else {
-	    print "\n\nError starting audio stream\n";
-	}
-    } else {
-	print "\n\nInvalid track id\n";
+switch ($MAINREQ)
+{
+  case "action"
+  {
+    switch ($MAINARG)
+    {
+      case "0"      {&logout(@REQ_ARG)}
+      case "1"      {&login(@REQ_ARG)}
+      case "2"      {&addUser(@REQ_ARG)}
+      case "3"      {&completePayment(@REQ_ARG)}
+      case "4"      {&findUser(@REQ_ARG)}
+      case "5"      {&editUser(@REQ_ARG)}
+      case "6"      {&deleteUser(@REQ_ARG)}
+      case "7"      {&addTrack(@REQ_ARG)}
+      case "9"      {&deleteTrack(@REQ_ARG)}
+      else          {print "Error invalid request type<br>"}
     }
-} else {
-    print "\n\nInvalid API key\n";
+  }  
+  case "token"      {&streamTrack(@REQ_ARG)}
+  else              {print "invalid request<br>"}  
 }
+
+#my $dbh = DBI->connect('dbi:mysql:ESD','root','root')
+#  or die "Connection Error: $DBI::errstr\n";
+#print "<h1>Museum Audio Guide Web API</h1>\n";
+
+#$sql = "SELECT * FROM ESD.KnowledgeLvl";
+# $sth = $dbh->prepare($sql);
+# $sth->execute
+# or die "SQL Error: $DBI::errstr\n";
+ 
+# while (@row = $sth->fetchrow_array) {
+# print "@row\n";
+# }
 
 print $q->end_html();
