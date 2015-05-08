@@ -4,7 +4,7 @@
 
 int main(int argc, char **argv)
 {
-	printf("testing display");
+  std::cout << "testing display";
 	LCDDisplay *display = new Display();
 
 	display->refresh();
