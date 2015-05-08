@@ -1,11 +1,12 @@
 
 
+#include <stdio.h>
 #include <LCDDisplay.h>
 
 int main(int argc, char **argv)
 {
-  std::cout << "testing display";
-	LCDDisplay *display = new Display();
+	printf("testing display");
+	LCDDisplay *display = new LCDDisplay();
 
 	display->refresh();
 
