@@ -9,6 +9,10 @@ use Time::Piece;
 ### Environment variable definitions
 $logfile='./gstreamer.log';
 $audio_base_path = "./";
+my $q = CGI->new();
+
+$HTTP_TYPE = 'text/plain';
+$HTTP_RESPONSE_OK = 'HTTP/1.1 200 OK';
 
 $remote_addr = "$ENV{REMOTE_ADDR}";
 if ($remote_addr eq "") {
@@ -48,10 +52,36 @@ sub login
     }
     else
     {
-      print "need to make a resposnse <br>";
-    }
-  }
+      print $q->header(-type=>$HTTP_TYPE, -status=>$HTTP_RESPONSE_OK);
+      print "$token";
+      print ':';
+      $sth = $CDSHandle->prepare("SELECT knowledgeLvl FROM ESD.KnowledgeLvl;");
+      $sth->execute
+        or die "SQL Error: $DBI::errstr\n";
       
+      my $row;
+      my $message = '';
+      while ($row = $sth->fetchrow_array)
+      {  # retrieve one row
+         $message .= $row . '-';
+      }
+      $message = substr($message, 0, -1);
+      print "$message";
+      
+      print ':';
+      $sth = $CDSHandle->prepare("SELECT language FROM ESD.Language;");
+      $sth->execute
+        or die "SQL Error: $DBI::errstr\n";
+      
+      $message = '';
+      while ($row = $sth->fetchrow_array)
+      {  # retrieve one row
+         $message .= $row . '-';
+      }
+      $message = substr($message, 0, -1);
+      print "$message";     
+    }
+  }     
 }
 
 #################################################################
@@ -118,7 +148,10 @@ sub streamTrack
 }
 
 #################################################################
-
+### Takes two arguments one is request_argument reference, the
+### second is a request type to find
+### it then returns the argument value of the request
+### and deletes the entry from the main array
 sub parse
 {
   my @match;
@@ -153,12 +186,22 @@ sub connectCDS
 ####################### MAIN PROGRAM FLOW #######################
 #################################################################
 
-my $q = CGI->new();
-
+### environment variables MAINREQ - type of the request
+### MAINARG the request argument
+### REQ_ARG holds a parsed URI request, it is passed through
+### an environment variable to the CGI script
+### split creates an array, by spliting the URI request
+### based on a "&" character
 @REQ_ARG = split (/&/, "$ENV{'QUERY_STRING'}");
 $MAINREQ;
 $MAINARG;
 
+### loops through the array of request_argument array
+### finds the main request type: "action" or "token"
+### one is for streaming file with an RPU, the rest for
+### the other actions.
+### It then deletes the found element from an array
+### (so that further array manipulations are 1 iteration shorter)
 foreach my $index (0 .. $#REQ_ARG)
 {
   if ( ( @REQ_ARG[$index] =~ /action/) || (@REQ_ARG[$index] =~ /token/) )
@@ -171,8 +214,12 @@ foreach my $index (0 .. $#REQ_ARG)
   }
 }
 
-print $q->header(), $q->start_html();
-
+### NOTE: backslash "\" before array "@" REQ_ARG means that it is
+### passed into a subroutine as a reference
+###
+### Main state machine, based on the request type "action" or "token"
+### calls appropriate subroutines as described in the
+### "URI REQUEST AND WEB API" document
 switch ($MAINREQ)
 {
   case "action"
@@ -194,5 +241,3 @@ switch ($MAINREQ)
   case "token"      {&streamTrack(\@REQ_ARG)}
   else              {print "invalid request<br>"}  
 }
-
-print $q->end_html();
