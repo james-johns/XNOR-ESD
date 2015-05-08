@@ -13,63 +13,104 @@ if ($remote_addr eq "") {
     $remote_addr = "127.0.0.1";
 }
 
-### Functions
+#################################################################
+########################## Functions ############################
+#################################################################
 
 sub login
 { 
-  # Finds and returns the "pin"
+  my $CDSHandle;
+  
+  # Finds and returns the "pin" value
   my $temp = &parse(\@REQ_ARG, 'pin');
-  print "$temp <br>";
+  
+  if ($temp eq "")
+  {
+    print "parsing error<br>";
+  }
+  else
+  {
+    $CDSHandle = &connectCDS();
+    my $sth = $CDSHandle->prepare("SELECT * FROM ESD.KnowledgeLvl");
+    $sth->execute
+      or die "SQL Error: $DBI::errstr\n";
+      
+    #while (@row = $sth->fetchrow_array)
+    #{
+    #  print "@row<br>";  
+    #}
+  }
+      
 }
+
+#################################################################
 
 sub logout
 {
   print "@_  --> logout <br>";
 }
 
+#################################################################
+
 sub addUser
 {
   print "@_  --> addUser <br>";
 }
+
+#################################################################
 
 sub completePayment
 {
   print "@_  --> completePayment <br>";
 }
 
+#################################################################
+
 sub findUser
 {
   print "@_  --> findUser <br>";
 }
+
+#################################################################
 
 sub editUser
 {
   print "@_  --> editUser <br>";
 }
 
+#################################################################
+
 sub deleteUser
 {
   print "@_  --> deleteUser <br>";
 }
+
+#################################################################
 
 sub addTrack
 {
   print "@_  --> addTrack <br>";
 }
 
+#################################################################
+
 sub deleteTrack
 {
   print "@_  --> deleteTrack <br>";
 }
+
+#################################################################
 
 sub streamTrack
 {
   print "@_  --> streamTrack <br>";
 }
 
+#################################################################
+
 sub parse
 {
-  my $match;
+  my @match;
   my @reqArg = @{@_[0]};
   my $searchArg = @_[1];  
 
@@ -77,22 +118,31 @@ sub parse
   {
     if ( ( $_ =~ /$searchArg/ ) )
     {
-      $match = $_;
+      @match = split(/=/, $_);
       last;
     }
   }
   
-  return $match;
+  return @match[1];
 }
 
-### Main program flow
+#################################################################
+
+sub connectCDS
+{
+  my $dbh = DBI->connect('dbi:mysql:ESD','root','root')
+    or die "Connection Error: $DBI::errstr\n";
+
+  return $dbh;
+}
+
+
+#################################################################
+####################### MAIN PROGRAM FLOW #######################
+#################################################################
+
 my $q = CGI->new();
 
-### Parsing a HTTP Request, QUERY_STRING
-### is a environment variable passed by the Apachi Web Server
-### split separates the string according to a specified delimiter "&"
-###
-### It then separates the array into two arrays both sides of the "=" delimiter
 @REQ_ARG = split (/&/, "$ENV{'QUERY_STRING'}");
 $MAINREQ;
 $MAINARG;
@@ -132,18 +182,5 @@ switch ($MAINREQ)
   case "token"      {&streamTrack(@REQ_ARG)}
   else              {print "invalid request<br>"}  
 }
-
-#my $dbh = DBI->connect('dbi:mysql:ESD','root','root')
-#  or die "Connection Error: $DBI::errstr\n";
-#print "<h1>Museum Audio Guide Web API</h1>\n";
-
-#$sql = "SELECT * FROM ESD.KnowledgeLvl";
-# $sth = $dbh->prepare($sql);
-# $sth->execute
-# or die "SQL Error: $DBI::errstr\n";
- 
-# while (@row = $sth->fetchrow_array) {
-# print "@row\n";
-# }
 
 print $q->end_html();
