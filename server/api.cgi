@@ -3,6 +3,8 @@
 use CGI;
 use DBI;
 use Switch;
+use Digest::MD5 qw(md5 md5_hex md5_base64);
+use Time::Piece;
 
 ### Environment variable definitions
 $logfile='./gstreamer.log';
@@ -20,25 +22,34 @@ if ($remote_addr eq "") {
 sub login
 { 
   my $CDSHandle;
+  my $refReqArg = shift;
   
   # Finds and returns the "pin" value
-  my $temp = &parse(\@REQ_ARG, 'pin');
-  
-  if ($temp eq "")
+  my $pin = &parse($refReqArg, 'pin');
+
+  if ($pin eq "")
   {
     print "parsing error<br>";
   }
   else
   {
-    $CDSHandle = &connectCDS();
-    my $sth = $CDSHandle->prepare("SELECT * FROM ESD.KnowledgeLvl");
+    my $dateTime = localtime->strftime('%m/%d/%Y');
+    my $token = md5_hex($dateTime);
+    my $CDSHandle = &connectCDS();
+    my $sth = $CDSHandle->prepare("SELECT pin FROM ESD.RPU WHERE pin='$pin';");
     $sth->execute
       or die "SQL Error: $DBI::errstr\n";
-      
-    #while (@row = $sth->fetchrow_array)
-    #{
-    #  print "@row<br>";  
-    #}
+     
+    my $found = $sth->fetch();
+    
+    if (@$found eq "")
+    {
+      print "could not find a record <br>";
+    }
+    else
+    {
+      print "need to make a resposnse <br>";
+    }
   }
       
 }
@@ -111,16 +122,17 @@ sub streamTrack
 sub parse
 {
   my @match;
-  my @reqArg = @{@_[0]};
-  my $searchArg = @_[1];  
+  my $refReqArg = shift;
+  my $searchArg = shift;
 
-  foreach (@reqArg)
-  {
-    if ( ( $_ =~ /$searchArg/ ) )
+  foreach $index (0 .. $#$refReqArg)
+  { 
+    if ($refReqArg->[$index] =~ /$searchArg/)
     {
-      @match = split(/=/, $_);
+      @match = split(/=/, $refReqArg->[$index]);
+      splice @$refReqArg, $index, 1;
       last;
-    }
+    }  
   }
   
   return @match[1];
@@ -167,19 +179,19 @@ switch ($MAINREQ)
   {
     switch ($MAINARG)
     {
-      case "0"      {&logout(@REQ_ARG)}
-      case "1"      {&login(@REQ_ARG)}
-      case "2"      {&addUser(@REQ_ARG)}
-      case "3"      {&completePayment(@REQ_ARG)}
-      case "4"      {&findUser(@REQ_ARG)}
-      case "5"      {&editUser(@REQ_ARG)}
-      case "6"      {&deleteUser(@REQ_ARG)}
-      case "7"      {&addTrack(@REQ_ARG)}
-      case "9"      {&deleteTrack(@REQ_ARG)}
+      case "0"      {&logout(\@REQ_ARG)}
+      case "1"      {&login(\@REQ_ARG)}
+      case "2"      {&addUser(\@REQ_ARG)}
+      case "3"      {&completePayment(\@REQ_ARG)}
+      case "4"      {&findUser(\@REQ_ARG)}
+      case "5"      {&editUser(\@REQ_ARG)}
+      case "6"      {&deleteUser(\@REQ_ARG)}
+      case "7"      {&addTrack(\@REQ_ARG)}
+      case "9"      {&deleteTrack(\@REQ_ARG)}
       else          {print "Error invalid request type<br>"}
     }
   }  
-  case "token"      {&streamTrack(@REQ_ARG)}
+  case "token"      {&streamTrack(\@REQ_ARG)}
   else              {print "invalid request<br>"}  
 }
 
