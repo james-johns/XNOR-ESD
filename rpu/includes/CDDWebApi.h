@@ -15,9 +15,9 @@ public:
 	int login(char pin[4]);
 	void logout();
 
-	void requestAudioStream(char trackID[4], int language, int knowledgeLevel);
-        void changeLanguage(int language);
-        void changeKnowledgeLevel(int knowledge);
+	int requestAudioStream(char trackID[4]);
+        int changeLanguage(int language);
+        int changeKnowledgeLevel(int knowledge);
 
 	
 private:
@@ -26,6 +26,7 @@ private:
 	char *ipaddr;
 	char lastTrackID[4];
 	char token[5];
+	int languageCode, knowledgeCode;
 };
 
 
