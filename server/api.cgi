@@ -14,6 +14,8 @@ my $q = CGI->new();
 $HTTP_TYPE = 'text/plain';
 $HTTP_RESPONSE_OK = 'HTTP/1.1 200 OK';
 
+print $q->header(-type=>$HTTP_TYPE, -status=>$HTTP_RESPONSE_OK); # required no matter what our response is
+
 $remote_addr = "$ENV{REMOTE_ADDR}";
 if ($remote_addr eq "") {
     $remote_addr = "127.0.0.1";
@@ -52,7 +54,6 @@ sub login
     }
     else
     {
-      print $q->header(-type=>$HTTP_TYPE, -status=>$HTTP_RESPONSE_OK);
       print "$token";
       print ':';
       $sth = $CDSHandle->prepare("SELECT knowledgeLvl FROM ESD.KnowledgeLvl;");
