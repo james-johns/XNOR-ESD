@@ -18,7 +18,7 @@ public:
 	~LCDDisplay();
 
 	void refresh();
-	void displayError(char *str);
+	
 private:
 };
 
