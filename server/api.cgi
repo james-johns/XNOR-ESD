@@ -8,7 +8,7 @@ use Time::Piece;
 
 ### Environment variable definitions
 $logfile='./gstreamer.log';
-$audio_base_path = "./";
+$audio_base_path = "/home/james/"; # should be reconfigured to a better location, base path for audio file storage
 my $q = CGI->new();
 
 $HTTP_TYPE = 'text/plain';
@@ -146,7 +146,57 @@ sub deleteTrack
 sub streamTrack
 {
   print "@_  --> streamTrack <br>";
+  my $args = shift;
+  my $trackid = parse($args, 'trackid');
+  my $language = parse($args, 'language');
+  my $knowledge = parse($args, 'knowledge');
+
+  my $trackpath = getTrackPath($trackid, $language, $knowledge);
+  stream_audio_track($trackpath, $remote_addr);
 }
+
+#################################################################
+### getTrackPath($trackid, $language, $knowledgeLevel)
+###
+### Return path to file for request language, knowledge level and track ID
+###
+sub getTrackPath
+{
+    return $audio_base_path . @_[0] . @_[1] . @_[2] . ".ogg";
+}
+
+#################################################################
+### stream_audio_track($trackPath, $targetIP);
+###
+### Begin streaming audio track.
+###
+### Checks that track file exists, and will begin streaming to target IP
+### if it does. Else prints an error message.
+sub stream_audio_track
+{
+    my $file      = @_[0];
+    my $target_ip = @_[1];
+    my $pid = 0;
+    if (-e $file) {
+	if (($pid = fork()) == 0) {
+	    close(STDOUT);
+	    close(STDERR);
+	    open(STDOUT, ">", $logfile);
+	    open(STDERR, ">", $logfile);
+	    exec("gst-launch-1.0", "filesrc", "location=$file", "!", 
+		 "tcpclientsink", "host=$target_ip", "port=3000");
+	    exit;
+	} else {
+	    print "gst-launch-1.0 filesrc location=$file ! ";
+	    print "tcpclientsink host=$target_ip port=3000<br />\n";
+	}
+    } else {
+	print "\n\nError Audio track does not exist\n";
+	print "$file";
+    }
+    return $pid;
+}
+
 
 #################################################################
 ### Takes two arguments one is request_argument reference, the
