@@ -46,7 +46,7 @@ td {
     <td align="center"><img src="img/openbutton.png"></td>
     </tr>
   <tr>
-    <td align="center"><input type="image" src="img/addtrackbutton.png" value="addTrack" title="Add Track" onclick="window.location.href='registeruser.php'" /></td>
+    <td align="center"><input type="image" src="img/addtrackbutton.png" value="addTrack" title="Add Track" onclick="window.location.href='addtrack.php'" /></td>
     <td align="center"><input type="image" src="img/replacetrackbutton.png" value="deleteTrack" title="Delete Track" onclick="window.location.href='registeruser.php'" /></td>
     <td align="center"><input type="image" src="img/deltrackbutton.png" value="replaceTrack" title="Replace Track" onclick="window.location.href='registeruser.php'" /></td>
     </tr>

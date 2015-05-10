@@ -8,7 +8,7 @@ use Time::Piece;
 
 ### Environment variable definitions
 $logfile='./gstreamer.log';
-$audio_base_path = "/home/james/"; # should be reconfigured to a better location, base path for audio file storage
+$audio_base_path = "/home/james/public_html/esd/audio/"; # should be reconfigured to a better location, base path for audio file storage
 my $q = CGI->new();
 
 $HTTP_TYPE = 'text/plain';
@@ -27,15 +27,16 @@ if ($remote_addr eq "") {
 
 sub login
 { 
+    @args = $q->param;
+    print("@args --> login");
   my $CDSHandle;
-  my $refReqArg = shift;
   
   # Finds and returns the "pin" value
-  my $pin = &parse($refReqArg, 'pin');
+  my $pin = $q->param('pin');
 
-  if ($pin eq "")
+  if (!$pin)
   {
-    print "parsing error<br>";
+    print "PIN number required<br>";
   }
   else
   {
@@ -131,7 +132,34 @@ sub deleteUser
 
 sub addTrack
 {
-  print "@_  --> addTrack <br>";
+    my @args = $q->param;
+  print "@args  --> addTrack <br>\n";
+  my $args = shift;
+  my $file = $q->param('file');
+  my $trackid = $q->param('trackid');
+  my $language = $q->param('language');
+  my $knowledge = $q->param('knowledge');
+
+  if (!$trackid) {
+      print "Track ID required to create new track\n $trackid";
+      return;
+  }
+  if (!$language) {
+      print "Language required to create new track\n $language";
+      return;
+  }
+  if (!$knowledge) {
+      print "Knowledge Level required to create new track\n $knowledge";
+      return;
+  }
+  if (!$file) {
+      print "Audio file required to create new track\n $file";
+      return;
+  }
+
+  my $filepath = getTrackPath($trackid, $language, $knowledge);
+    print "Saving to $filepath";
+  storeFile($file, $filepath);
 }
 
 #################################################################
@@ -139,6 +167,44 @@ sub addTrack
 sub deleteTrack
 {
   print "@_  --> deleteTrack <br>";
+  my $args = shift;
+  my $file = $q->param('filename');
+  my $trackid = $q->param('trackid');
+  my $language = $q->param('language');
+  my $knowledge = $q->param('knowledge');
+
+  if ($trackid ne "") {
+      print "Track ID required to create new track";
+      return;
+  }
+  if ($language ne "") {
+      print "Language required to create new track";
+      return;
+  }
+  if ($knowledge ne "") {
+      print "Knowledge Level required to create new track";
+      return;
+  }
+  if ($file ne "") {
+      print "Audio file required to create new track";
+      return;
+  }
+
+  my $filepath = getTrackPath($trackid, $language, $knowledge);
+  # delete file
+}
+
+sub storeFile {
+    my $file = @_[0];
+    my $filepath = @_[1];
+
+#    $file=~m/^.*(\\|\/)(.*)/; # strip the remote path and keep the filename
+#    my $name = $2;
+    open(LOCAL, ">$filepath") or die $!;
+    while(<$file>) {
+        print LOCAL $_;
+    }
+    print "$file has been successfully uploaded... thank you.\n";
 }
 
 #################################################################
@@ -146,10 +212,9 @@ sub deleteTrack
 sub streamTrack
 {
   print "@_  --> streamTrack <br>";
-  my $args = shift;
-  my $trackid = parse($args, 'trackid');
-  my $language = parse($args, 'language');
-  my $knowledge = parse($args, 'knowledge');
+  my $trackid = $q->param('trackid');
+  my $language = $q->param('language');
+  my $knowledge = $q->param('knowledge');
 
   my $trackpath = getTrackPath($trackid, $language, $knowledge);
   stream_audio_track($trackpath, $remote_addr);
@@ -187,6 +252,7 @@ sub stream_audio_track
 		 "tcpclientsink", "host=$target_ip", "port=3000");
 	    exit;
 	} else {
+	    print "Success\n\n";
 	    print "gst-launch-1.0 filesrc location=$file ! ";
 	    print "tcpclientsink host=$target_ip port=3000<br />\n";
 	}
@@ -197,30 +263,6 @@ sub stream_audio_track
     return $pid;
 }
 
-
-#################################################################
-### Takes two arguments one is request_argument reference, the
-### second is a request type to find
-### it then returns the argument value of the request
-### and deletes the entry from the main array
-sub parse
-{
-  my @match;
-  my $refReqArg = shift;
-  my $searchArg = shift;
-
-  foreach $index (0 .. $#$refReqArg)
-  { 
-    if ($refReqArg->[$index] =~ /$searchArg/)
-    {
-      @match = split(/=/, $refReqArg->[$index]);
-      splice @$refReqArg, $index, 1;
-      last;
-    }  
-  }
-  
-  return @match[1];
-}
 
 #################################################################
 
@@ -237,45 +279,19 @@ sub connectCDS
 ####################### MAIN PROGRAM FLOW #######################
 #################################################################
 
-### environment variables MAINREQ - type of the request
-### MAINARG the request argument
-### REQ_ARG holds a parsed URI request, it is passed through
-### an environment variable to the CGI script
-### split creates an array, by spliting the URI request
-### based on a "&" character
-@REQ_ARG = split (/&/, "$ENV{'QUERY_STRING'}");
-$MAINREQ;
-$MAINARG;
-
-### loops through the array of request_argument array
-### finds the main request type: "action" or "token"
-### one is for streaming file with an RPU, the rest for
-### the other actions.
-### It then deletes the found element from an array
-### (so that further array manipulations are 1 iteration shorter)
-foreach my $index (0 .. $#REQ_ARG)
-{
-  if ( ( @REQ_ARG[$index] =~ /action/) || (@REQ_ARG[$index] =~ /token/) )
-  {
-    my @TEMP = split(/=/, $REQ_ARG[$index]);
-    $MAINREQ = $TEMP[0];
-    $MAINARG = $TEMP[1];
-    splice @REQ_ARG, $index, 1;
-    last;
-  }
-}
-
 ### NOTE: backslash "\" before array "@" REQ_ARG means that it is
 ### passed into a subroutine as a reference
 ###
 ### Main state machine, based on the request type "action" or "token"
 ### calls appropriate subroutines as described in the
 ### "URI REQUEST AND WEB API" document
-switch ($MAINREQ)
-{
-  case "action"
-  {
-    switch ($MAINARG)
+$action = $q->param('action');
+$token = $q->param('token');
+print "ACTION: $action\n";
+print "TOKEN: $token\n";
+
+if ($action ne "") {
+    switch ($action)
     {
       case "0"      {&logout(\@REQ_ARG)}
       case "1"      {&login(\@REQ_ARG)}
@@ -284,11 +300,15 @@ switch ($MAINREQ)
       case "4"      {&findUser(\@REQ_ARG)}
       case "5"      {&editUser(\@REQ_ARG)}
       case "6"      {&deleteUser(\@REQ_ARG)}
-      case "7"      {&addTrack(\@REQ_ARG)}
+      case "7"      {&addTrack()}
       case "9"      {&deleteTrack(\@REQ_ARG)}
-      else          {print "Error invalid request type<br>"}
+      else          {print "Error invalid action"}
     }
   }  
-  case "token"      {&streamTrack(\@REQ_ARG)}
-  else              {print "invalid request<br>"}  
+elsif ($token ne "") {
+    &streamTrack(\@REQ_ARG);
 }
+else {
+      print "invalid request";
+}  
+
