@@ -55,10 +55,10 @@ void LCDDisplay::refresh()
   char blockNumber3[1]={192};//10th character of the display
  
   
-  char trackOutputString [4][15];
-  char menuOutputString [4][16];
-  char errorOutputString [4][16];
-  int tokenNumber=0;
+  char trackOutputString [2][15];
+  char menuOutputString [2][16];
+  char errorOutputString [1][32];
+  int tokenNumber;
   int j=0;
 
   if (playbackDirty == true & playbackString != NULL)
@@ -72,37 +72,59 @@ void LCDDisplay::refresh()
     }
 
 
-
   if (trackInfoDirty == true & trackInfoString != NULL)
     {
       j=0;
       tokenNumber=0;
-      std::cout << "writing track Info  String\n";
-      std::cout <<"size of trackinfo string: " << strlen(trackInfoString) << "\n";
-      for ( i=0;i <= strlen(trackInfoString);i++)
+      std::cout << "writing track Info String\n";
+      std::cout <<"size of the trackinfo string: " << strlen(trackInfoString) << "\n";
+      for ( i=0 ;i <= strlen(trackInfoString);i++)
 	{
-	  
-	  // std::cout << "current char number: " << j <<"\n";
-	    std::cout << "current char : " << trackInfoString[i] <<"\n";
+	 // std::cout << "current char of the track info string: " << trackInfoString[i] <<"\n";
 	  trackOutputString[tokenNumber][i] =  trackInfoString[i];
-	     std::cout << "copied char : " << trackOutputString[tokenNumber][i] <<"\n";
-	  j++;
-	  if (j==15)
+	  // std::cout << "copied char to track output string : " << trackOutputString[tokenNumber][i] <<"\n";
+	  // std::cout << "current j value: " << j <<"\n";
+	
+	  if (j==14)
 	    {
-	      std::cout << "new string created\n";
-	      std::cout << "string Created : " << trackOutputString[tokenNumber] <<"\n";
+	      std::cout << "string Created \n";
+	      //    std::cout << "token Number : " << tokenNumber << "\n";
 	      tokenNumber++;
-
+	      // std::cout << "current token Number: " << tokenNumber << "\n";
 	      j=0;
 	    }
+	  j++; 
 	}
-      
+    
+      if(strlen(trackOutputString[tokenNumber]) <15)
+	{
+	  for (int l=strlen(trackOutputString[tokenNumber]);l<15;l++)
+	    {
+	      trackOutputString[tokenNumber][l] = ' ';
+	    }
+	}
+
+
+      /* for (int l=0;l <=strlen(trackOutputString[tokenNumber]);l++)
+	    {
+	      std::cout << " char in 2nd output  string : " << trackOutputString[tokenNumber][l] <<"\n";
+	    }
+     
+      */
+      std::cout << " first string in output string : " << trackOutputString[0] <<"\n";
+      std::cout << " second string in output string : " << trackOutputString[1] <<"\n";
       std::cout << "number of Strings = " << tokenNumber+1 << "\n";
-      for(int k=0;k<=tokenNumber;k++)
+ 
+      
+
+      for(int k=0;k<=tokenNumber+1;k++)
 	{
 	  if (trackOutputString[k] != NULL)
 	    {
-	      std::cout << "current string : " << trackOutputString[k] <<"\n";
+
+	     
+	      // std::cout << "current string number : "<< k << "\n";
+	      std:: cout << " string contents: " << trackOutputString[k] <<"\n";
 	      write(displayDevice,displayOptionMode,sizeof(displayOptionMode));
 	      write(displayDevice,blockNumber2,sizeof(blockNumber2));
 	      write(displayDevice,trackOutputString[k],strlen(trackOutputString[k]));
@@ -118,30 +140,37 @@ void LCDDisplay::refresh()
       tokenNumber=0;
       j=0;
       std::cout << "writing menu String\n";
-      std::cout <<"size of menu string: " << strlen(menuString) << "\n";
+      std::cout <<"size of the menu string: " << strlen(menuString) << "\n";
       for (int i=0;i <= strlen(menuString);i++)
 	{
 	  //std::cout << "current char number: " << j <<"\n";
-	  std::cout << "current char : " << menuString[i] <<"\n";
+	  // std::cout << "current char of menu String : " << menuString[i] <<"\n";
 	  menuOutputString[tokenNumber][i] =  menuString[i];
-	   std::cout << "copied char : " << menuOutputString[tokenNumber][i] <<"\n";
-	  j++;
-	  if (j==16)
+	  //std::cout << "copied char to menuOutput String : " << menuOutputString[tokenNumber][i] <<"\n";
+	 
+	  // std::cout << "current token Number: " << tokenNumber << "\n";
+	  if (j==15)
 	    {
 	      std::cout << "new string created\n";
+	      //std::cout << "String Created : " << menuOutputString[tokenNumber] << "\n";
 	      tokenNumber++;
+	     
 	      j=0;
 	    }
+	  j++;
 	}
      
+   if(strlen(menuOutputString[tokenNumber]) <15)
+	{
+	  for (int l=strlen(menuOutputString[tokenNumber]);l<15;l++)
+	    {
+	      menuOutputString[tokenNumber][l] = ' ';
+	    }
+	}
 
-      /*  if (menuOutputString[tokenNumber][15]=="/r")
-	  {
-	  menuOutputString[tokenNumber][15]=" ";
-	  }*/
-
-      std::cout << "number of Strings = " << tokenNumber+1 << "\n";
-      for(int k=0;k<=tokenNumber;k++)
+          std::cout << "number of Strings = " << tokenNumber << "\n";
+	  
+	  for(int k=0;k<=tokenNumber+1;k++)
 	{
 	  if (menuOutputString[k] != NULL)
 	    {
@@ -170,26 +199,29 @@ void LCDDisplay::refresh()
       for (int i=0;i <= strlen(errorString);i++)
 	{
 	  // std::cout << "current char number: " << j <<"\n";
-	  std::cout << "current char : " << menuString[i] <<"\n";
+	  //std::cout << "current char : " << menuString[i] <<"\n";
 	  errorOutputString[tokenNumber][i] =  errorString[i];
-	   std::cout << "copied char : " << menuOutputString[tokenNumber][i] <<"\n";
+	  // std::cout << "copied char : " << menuOutputString[tokenNumber][i] <<"\n";
 	  j++;
-	  if (j==16)
+	  /*if (j==15)
 	    {
 	      std::cout << "new string created\n";
 	      tokenNumber++;
 	      j=0;
-	    }
+	      }*/
 	}
      
 
-      /*  if (menuOutputString[tokenNumber][15]=="/r")
-	  {
-	  menuOutputString[tokenNumber][15]=" ";
-	  }*/
+      if(strlen(errorOutputString[tokenNumber]) <15)
+	{
+	  for (int l=strlen(errorOutputString[tokenNumber]);l<15;l++)
+	    {
+	      errorOutputString[tokenNumber][l] = ' ';
+	    }
+	} 
 
       std::cout << "number of Strings = " << tokenNumber+1 << "\n";
-      for(int k=0;k<=tokenNumber;k++)
+      for(int k=0;k<=tokenNumber+1;k++)
 	{
 	  if (errorOutputString[k] != NULL)
 	    {
