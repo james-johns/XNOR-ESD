@@ -3,16 +3,9 @@
 #include <LCDDisplay.h>
 
 
-//set up variables
-char displayOptionMode[1] = {254};//special char that puts the display into a mode waiting for the next character to define which option is needed.
-char displayClear[1] = {1};
-struct termios options;
-int displayDevice;
-int currentChar;
-int i,j,k,l;
-
 LCDDisplay::LCDDisplay() : Display()
 {
+	struct termios options;
 	std::cout << "opening ttyUSB0\n";
 	displayDevice = open("/dev/ttyUSB0", O_RDWR) ;
 	if( displayDevice == -1) {
@@ -25,26 +18,29 @@ LCDDisplay::LCDDisplay() : Display()
 	}
 	std::cout << "file opened\n";
 
+	displayOptionMode = (char) 254;
+	displayClear = (char) 1;
+
 	tcgetattr(displayDevice, &options);
 	cfsetispeed(&options, B9600);
 	cfsetospeed(&options, B9600);
 	tcsetattr(displayDevice, TCSANOW, &options);
 
 	//display will enter option mode and wait for the next sspecial character.
-	write(displayDevice,displayOptionMode,sizeof(displayOptionMode));
+	write(displayDevice, &displayOptionMode, 1);
 	//special command to clear the display screen
-	write(displayDevice,displayClear,sizeof(displayClear));
+	write(displayDevice, &displayClear, 1);
  
 }
 
 LCDDisplay::~LCDDisplay()
 {
-
+	close(displayDevice);
 }
 
 void LCDDisplay::refresh()
 {
-	char displayOptionMode[1] = {254};//Special character to enable option mode
+	int currentChar;
 	char blockNumber1[1]={128};//first character of the display
 	char blockNumber2[1]={129};//2nd character of the display
 	char blockNumber3[1]={192};//10th character of the display
@@ -62,9 +58,9 @@ void LCDDisplay::refresh()
 
 	if (playbackDirty == true & playbackString != NULL) {
 		std::cout << "writing playback String\n";
-		write(displayDevice,displayOptionMode,sizeof(displayOptionMode));
-		write(displayDevice,blockNumber1,sizeof(blockNumber1));
-		write(displayDevice,playbackString,1);
+		write(displayDevice, &displayOptionMode, 1);
+		write(displayDevice, blockNumber1, sizeof(blockNumber1));
+		write(displayDevice, playbackString, 1);
 		playbackDirty = false;
       	}
 
@@ -91,9 +87,9 @@ void LCDDisplay::refresh()
 		for(int k=0;k<tokenNumber;k++) {
 			if (trackOutputString[k][0] != 0) {
 				std:: cout << " string contents: " << trackOutputString[k] <<"\n";
-				write(displayDevice,displayOptionMode,sizeof(displayOptionMode));
-				write(displayDevice,blockNumber2,sizeof(blockNumber2));
-				write(displayDevice,trackOutputString[k],strlen(trackOutputString[k]));
+				write(displayDevice, &displayOptionMode, 1);
+				write(displayDevice, blockNumber2, sizeof(blockNumber2));
+				write(displayDevice, trackOutputString[k], strlen(trackOutputString[k]));
 				sleep(5);
 			}
 		}
@@ -123,9 +119,9 @@ void LCDDisplay::refresh()
 		for(int k=0;k<tokenNumber;k++) {
 			if (menuOutputString[k][0] != 0) {
 				std:: cout << " string contents: " << menuOutputString[k] <<"\n";
-				write(displayDevice,displayOptionMode,sizeof(displayOptionMode));
-				write(displayDevice,blockNumber3,sizeof(blockNumber3));
-				write(displayDevice,menuOutputString[k],strlen(menuOutputString[k]));
+				write(displayDevice, &displayOptionMode, 1);
+				write(displayDevice, blockNumber3, sizeof(blockNumber3));
+				write(displayDevice, menuOutputString[k], strlen(menuOutputString[k]));
 				sleep(5);
 			}
 		}
@@ -155,9 +151,9 @@ void LCDDisplay::refresh()
 		for(int k=0;k<tokenNumber;k++) {
 			if (errorOutputString[k][0] != 0) {
 				std:: cout << " string contents: " << errorOutputString[k] <<"\n";
-				write(displayDevice,displayOptionMode,sizeof(displayOptionMode));
-				write(displayDevice,blockNumber1,sizeof(blockNumber1));
-				write(displayDevice,errorOutputString[k],strlen(errorOutputString[k]));
+				write(displayDevice, &displayOptionMode, 1);
+				write(displayDevice, blockNumber1, sizeof(blockNumber1));
+				write(displayDevice, errorOutputString[k], strlen(errorOutputString[k]));
 				sleep(5);
 			}
 		}

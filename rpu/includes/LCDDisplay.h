@@ -20,6 +20,11 @@ public:
 	void refresh();
 	
 private:
+	int displayDevice; // file descriptor of connected device
+
+	char displayOptionMode; // special control character for configuring display
+	char displayClear; // character to write after displayOptionMode to clear the entire display
+
 };
 
 #endif
