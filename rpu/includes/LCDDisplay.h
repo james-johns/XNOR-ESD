@@ -12,6 +12,10 @@
 #include <fcntl.h>
 #include <stdio.h>
 
+struct displayBlock {
+	int start, length;
+};
+
 class LCDDisplay : public Display {
 public:
 	LCDDisplay();
@@ -20,7 +24,10 @@ public:
 	void refresh();
 	
 private:
+	void writeBlock(int block, char *inputString);
+
 	int displayDevice; // file descriptor of connected device
+	struct displayBlock *blocks;
 
 	char displayOptionMode; // special control character for configuring display
 	char displayClear; // character to write after displayOptionMode to clear the entire display

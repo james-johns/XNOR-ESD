@@ -1,5 +1,7 @@
 
 
+#include <stdlib.h>
+
 #include <LCDDisplay.h>
 
 
@@ -30,7 +32,12 @@ LCDDisplay::LCDDisplay() : Display()
 	write(displayDevice, &displayOptionMode, 1);
 	//special command to clear the display screen
 	write(displayDevice, &displayClear, 1);
- 
+
+	blocks = (struct displayBlock *) malloc(sizeof(struct displayBlock)*4);
+	blocks[0].start = 0;	blocks[0].length = 1;
+	blocks[1].start = 1;	blocks[1].length = 15;
+	blocks[2].start = 16;	blocks[2].length = 16;
+	blocks[3].start = 0;	blocks[3].length = 32;
 }
 
 LCDDisplay::~LCDDisplay()
@@ -160,3 +167,44 @@ void LCDDisplay::refresh()
 		errorString = NULL;
 	}
 }
+
+void LCDDisplay::writeBlock(int block, char *inputString)
+{
+	char outputString[4][33];
+	int tokenNumber=0;
+	int blockLength = blocks[block].length;
+	int inputStringLength = strlen(inputString);
+
+	std::cout << "writing block: " << block << std::endl;
+	std::cout << "size of input string: " << inputStringLength << std::endl;
+	
+	for (int i = 0; i < inputStringLength; i += blocks[block].length) {
+		int tokenLength = (((inputStringLength - i) >= blockLength) ? blockLength : (inputStringLength - i));
+
+		strncpy(outputString[i/blockLength], inputString + i, tokenLength);
+		outputString[i/blockLength][tokenLength] = '\0'; // null terminate after the data we copied
+
+		std::cout << "tokenNumber: " << tokenNumber << "\n";
+		tokenNumber++;
+	}
+	
+	int lastTokenLength = strlen(outputString[tokenNumber - 1]);
+	if(lastTokenLength < blockLength) {
+		for (int i = lastTokenLength; i < blockLength; i++) {
+			outputString[tokenNumber - 1][i] = ' ';
+		}
+		outputString[tokenNumber - 1][blockLength] = '\0'; // ensure the output string is null terminated
+	}
+	
+	for(int i=0; i < tokenNumber; i++) {
+		if (outputString[i][0] != 0) {
+			std:: cout << " string contents: " << outputString[i] <<"\n";
+			char pos = ((char) 128) + blocks[block].start;
+			write(displayDevice, &displayOptionMode, 1);
+			write(displayDevice, &pos, 1);
+			write(displayDevice, outputString[i], strlen(outputString[i]));
+			sleep(5);
+		}
+	}
+}
+
