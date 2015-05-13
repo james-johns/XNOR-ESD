@@ -4,19 +4,19 @@
  */
 #include <iostream>
 
-#include <AudioPlayer.h>
+#include <GSTAudioPlayer.h>
 #include <gst/gst.h>
 
-/*! AudioPlayer::AudioPlayer(const char *ipaddr)
+/*! GSTAudioPlayer::GSTAudioPlayer(const char *ipaddr)
  * @author James Johns
- * @brief AudioPlayer constructor
+ * @brief GSTAudioPlayer constructor
  *
  * @param[in] ipaddr IP Address to connect to when receiving audio
  *
  * @details Creates and initialises a Gstreamer pipeline to stream audio over TCP port 3000,
  * decode, convert and playback the audio stream via an alsa device.
  */
-AudioPlayer::AudioPlayer(const char *ipaddr)
+GSTAudioPlayer::GSTAudioPlayer(const char *ipaddr) : AudioPlayer(ipaddr)
 {
 	std::string pipelineString = "tcpserversrc host=";
 	pipelineString += (ipaddr != NULL) ? ipaddr : "127.0.0.1";
@@ -27,71 +27,71 @@ AudioPlayer::AudioPlayer(const char *ipaddr)
 	loop = g_main_loop_new(NULL, FALSE);
 }
 
-/*! AudioPlayer::AudioPlayer(const char *ipaddr)
+/*! GSTAudioPlayer::GSTAudioPlayer(const char *ipaddr)
  * @author James Johns
- * @brief AudioPlayer destructor
+ * @brief GSTAudioPlayer destructor
  *
- * @details Kills the Gstreamer pipeline during deletion of the AudioPlayer object
+ * @details Kills the Gstreamer pipeline during deletion of the GSTAudioPlayer object
  */
-AudioPlayer::~AudioPlayer()
+GSTAudioPlayer::~GSTAudioPlayer()
 {
 	stop(); /*!< Stop playing audio before unreferencing pipeline */
 	gst_element_set_state(pipeline, GST_STATE_NULL);
 	gst_object_unref(pipeline);
 }
 
-/*! AudioPlayer::run()
+/*! GSTAudioPlayer::run()
  * @author James Johns
  * @brief Run the Gstreamer pipeline
  *
  * @details Begin running the gstreamer main loop for this player.
  * Blocks until the main loop quits.
  */
-void AudioPlayer::run()
+void GSTAudioPlayer::run()
 {
 	g_main_loop_run(loop);
 }
 
-/*! AudioPlayer::stop()
+/*! GSTAudioPlayer::stop()
  * @author James Johns
  * @brief Stop the Gstreamer pipeline
  *
  * @details Stop the audio player from running.
- * Any calls to AudioPlayer::run() will return.
+ * Any calls to GSTAudioPlayer::run() will return.
  */
-void AudioPlayer::stop()
+void GSTAudioPlayer::stop()
 {
 	g_main_loop_quit(loop);
 }
 
-/*! AudioPlayer::pause()
+/*! GSTAudioPlayer::pause()
  * @author James Johns
  * @brief Pause the Gstreamer pipeline
  *
  * @details Set the audio pipeline to paused
  */
-void AudioPlayer::pause()
+void GSTAudioPlayer::pause()
 {
 	gst_element_set_state(pipeline, GST_STATE_PAUSED);
 }
 
-/*! AudioPlayer::play()
+/*! GSTAudioPlayer::play()
  * @author James Johns
  * @brief Play the Gstreamer pipeline
  *
  * @details Set the audio pipeline to play
  */
-void AudioPlayer::play()
+void GSTAudioPlayer::play()
 {
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
 }
 
-/*! AudioPlayer::playpause()
+/*! GSTAudioPlayer::playpause()
  * @author James Johns
  * @brief Toggle the Gstreamer pipeline between play and pause state
  *
  */
-void AudioPlayer::playpause()
+void GSTAudioPlayer::playpause()
 {
 	if (isPlaying())
 		pause();
@@ -99,26 +99,26 @@ void AudioPlayer::playpause()
 		play();
 }
 
-/*! AudioPlayer::isPlaying()
+/*! GSTAudioPlayer::isPlaying()
  * @author James Johns
  * @brief Find if the Gstreamer pipeline is playing
  * @returns True if pipeline is playing, else false.
  */
-bool AudioPlayer::isPlaying()
+bool GSTAudioPlayer::isPlaying()
 {
 	GstState state;
 	gst_element_get_state(pipeline, &state, NULL, 0);
 	return (state == GST_STATE_PLAYING);
 }
 
-/*! AudioPlayer::rewind()
+/*! GSTAudioPlayer::rewind()
  * @author James Johns
  * @brief Rewind the Gstreamer pipeline
  *
  * @details rewind the current playing stream by 5 seconds, or to the beginning of the stream; 
  * whichever is closer to the current position
  */
-void AudioPlayer::rewind()
+void GSTAudioPlayer::rewind()
 {
 	gint64 nano;
 	gst_element_query_position(pipeline, GST_FORMAT_TIME, &nano);

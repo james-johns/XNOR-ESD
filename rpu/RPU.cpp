@@ -18,6 +18,7 @@
 #include <KeyboardDevice.h>
 #include <NCursesDisplay.h>
 #include <Menu.hpp>
+#include <GSTAudioPlayer.h>
 
 /*! RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
  * @author James Johns
@@ -37,7 +38,7 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 			delete *it;
 	}
 	delete addresses;
-	player = new AudioPlayer(ipaddr);
+	player = new GSTAudioPlayer(ipaddr);
 	delete ipaddr;
 
 	mainMenu = new Menu();
