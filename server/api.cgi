@@ -97,7 +97,25 @@ sub logout
 
 sub addUser
 {
-  print "@_  --> addUser <br>";
+  my $CDSHandle;
+  my @fullname = split( /-/, $q->param('fullname'));
+  my $address = $q->param('address');
+  my $language = $q->param('language');
+  my $mobile = $q->param('mobilenum');
+  if (!@fullname)
+  {
+    print "Name and Surname is required!\n";
+  }
+  else
+  {
+    $CDSHandle = &connectCDS();
+    $CDSHandle->do('INSERT INTO ESD.Client (forename, surname, mobilePhone, address) VALUES (?,?,?,?)',
+      undef, $fullname[0], $fullname[1], $mobile, $address)
+        or die "SQL Error: $DBI::errstr\n";
+    my $id = $CDSHandle->last_insert_id(undef, undef, undef, undef);
+    print "$id\n";
+    #print "@fullname - $address - $language - $mobile";
+  }
 }
 
 #################################################################
