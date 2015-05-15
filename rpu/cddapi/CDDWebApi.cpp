@@ -59,6 +59,9 @@ int CDDWebApi::login(char pin[4])
 	if (!cdd)
 		return -1;
 
+	//std::cout << "Init success!\n";
+	//std::cout << "IP:" << ipaddr << "\nPin:" << pin << "\n";
+
 	// Configure libCuRL to output response to a string
 	std::string toSend, response;
 	curl_easy_setopt (cdd, CURLOPT_WRITEFUNCTION, writeToString);
@@ -67,15 +70,25 @@ int CDDWebApi::login(char pin[4])
 	// Construct a string to request a login
 	toSend = "http://";
 	toSend += ipaddr;
-	toSend += ":8080/api.cgi?&loginflag=1&pin=";
+	toSend += ":80/api.cgi?&action=1&pin=";
 	toSend += pin;
-      
+
+	std::cout << "\nOutput: " << toSend << "\n";
+
 	// Send login request
 	curl_easy_setopt (cdd, CURLOPT_URL, toSend.c_str());
-	curl_easy_perform(cdd);
+	int errorCode = curl_easy_perform(cdd);
+	if (errorCode != CURLE_OK)
+	{
+		std::cout << "Error: " << errorCode << "\n";
+		std::cout << "See: http://curl.haxx.se/libcurl/c/libcurl-errors.html\n";
+		return -1;
+	}
+
+	std::cout << "\nResponse:\n" << response << "\n\n";
 
 	// Check response
-	size_t firstLine = response.find ("\n");
+	/*size_t firstLine = response.find ("\n");
 	if (response.substr (0, firstLine).compare ("HTTP/1.1 200 OK")==0) {
 		// Auth Successful, copy token
 		strncpy (token, response.substr
@@ -84,7 +97,8 @@ int CDDWebApi::login(char pin[4])
 	} else {
 		// failed
 		return -1;
-	}     
+		} */
+	return 0;    
 	
 }
 
