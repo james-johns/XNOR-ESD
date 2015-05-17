@@ -20,14 +20,26 @@ if ($remote_addr eq "") {
     $remote_addr = "127.0.0.1";
 }
 
+my $debug = $q->param('debug');
+
 #################################################################
 ########################## Functions ############################
 #################################################################
 
+sub debugPrint
+{
+    my $args = shift;
+    if ($debug ne "") {
+	foreach $arg ($args) {
+	    print ("$arg");
+	}
+    }
+}
+
 sub login
 { 
     @args = $q->param;
-    print("@args --> login");
+    debugPrint("@args --> login");
   my $CDSHandle;
   
   # Finds and returns the "pin" value
@@ -89,7 +101,7 @@ sub login
 
 sub logout
 {
-  print "@_  --> logout <br>";
+  debugPrint "@_  --> logout <br>";
 }
 
 #################################################################
@@ -190,21 +202,21 @@ END_MESSAGE
 
 sub findUser
 {
-  print "@_  --> findUser <br>";
+  debugPrint "@_  --> findUser <br>";
 }
 
 #################################################################
 
 sub editUser
 {
-  print "@_  --> editUser <br>";
+  debugPrint "@_  --> editUser <br>";
 }
 
 #################################################################
 
 sub deleteUser
 {
-  print "@_  --> deleteUser <br>";
+  debugPrint "@_  --> deleteUser <br>";
 }
 
 #################################################################
@@ -212,7 +224,7 @@ sub deleteUser
 sub addTrack
 {
     my @args = $q->param;
-  print "@args  --> addTrack <br>\n";
+  debugPrint "@args  --> addTrack <br>\n";
   my $args = shift;
   my $file = $q->param('file');
   my $trackid = $q->param('trackid');
@@ -245,7 +257,7 @@ sub addTrack
 
 sub deleteTrack
 {
-  print "@_  --> deleteTrack <br>";
+  debugPrint "@_  --> deleteTrack <br>";
   my $args = shift;
   my $file = $q->param('filename');
   my $trackid = $q->param('trackid');
@@ -290,7 +302,7 @@ sub storeFile {
 
 sub streamTrack
 {
-  print "@_  --> streamTrack <br>";
+  debugPrint "@_  --> streamTrack <br>";
   my $trackid = $q->param('trackid');
   my $language = $q->param('language');
   my $knowledge = $q->param('knowledge');
@@ -366,8 +378,8 @@ sub connectCDS
 ### "URI REQUEST AND WEB API" document
 $action = $q->param('action');
 $token = $q->param('token');
-print "ACTION: $action\n";
-print "TOKEN: $token\n";
+debugPrint "ACTION: $action\n";
+debugPrint "TOKEN: $token\n";
 
 if ($action ne "") {
     switch ($action)
