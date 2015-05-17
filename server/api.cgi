@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-
 use CGI;
 use DBI;
 use Switch;
@@ -113,8 +112,7 @@ sub addUser
       undef, $fullname[0], $fullname[1], $mobile, $address)
         or die "SQL Error: $DBI::errstr\n";
     my $id = $CDSHandle->last_insert_id(undef, undef, undef, undef);
-    print "$id\n";
-    #print "@fullname - $address - $language - $mobile";
+    print "$id";
   }
 }
 
@@ -122,7 +120,70 @@ sub addUser
 
 sub completePayment
 {
-  print "@_  --> completePayment <br>";
+  my $CDSHandle;  
+  my $userid = $q->param('userid');
+  
+  # for some reason $q->param('name'); does`t work in a list context 
+  my @payment = split(/ /, $q->param('paymentdetails'));
+  if (!$userid && !@payment)
+  {
+    print "User ID and payment details are required!\n";
+  }
+  else
+  {
+    $CDSHandle = &connectCDS();
+    my $query = '';
+    # Getting the payment type id
+    my $sth = $CDSHandle->prepare("SELECT idPaymentType FROM ESD.PaymentType WHERE paymentType='$payment[1]';");
+    $sth->execute
+      or die "SQL Error: $DBI::errstr\n";
+       
+    #my $paymentMethodId = $sth->fetch();
+    my @paymentMethodId = $sth->fetchrow_array();
+    if (@paymentMethodId eq "")
+    {
+      print "could not find a record\n";
+    }
+    else
+    {
+    
+    #generate random 4 digit number
+    $rpuPin = int(rand(9999)) + "0000";
+    $CDSHandle->do("INSERT INTO ESD.RPU (pin) VALUES ($rpuPin);")
+        or die "SQL Error: $DBI::errstr\n";
+    #creating a new RPU entry - shit idea, but for now ok  
+
+    
+
+    # Message body has to start at the beginning of the line
+    
+    #creating a new transaction entry
+    
+    # Message body has to start at the beginning of the line
+    $query = << 'END_MESSAGE';
+INSERT INTO ESD.Transaction (transaction, idPaymentType, date, time)
+VALUES (?,?,?,?)            
+END_MESSAGE
+
+    $CDSHandle->do($query, undef, $payment[0], $paymentMethodId[0], $payment[1], $payment[2])
+        or die "SQL Error: $DBI::errstr\n";
+    my $idTransaction = $CDSHandle->last_insert_id(undef, undef,undef, undef);
+    
+    # create a new session entry
+    $query = '';
+    # Message body has to start at the beginning of the line
+#    $query = << 'END_MESSAGE';
+#INSERT INTO ESD.Session (idClient, idTransaction, idRPU, date, timeIn)
+#VALUES (?,?,?,?)            
+#END_MESSAGE
+    
+    print "$query";
+    
+    #$CDSHandle->do('INSERT INTO ESD.Client (forename, surname, mobilePhone, address) VALUES (?,?,?,?)',
+      #undef, $fullname[0], $fullname[1], $mobile, $address)
+       # or die "SQL Error: $DBI::errstr\n";
+   } 
+  }
 }
 
 #################################################################
@@ -311,20 +372,20 @@ print "TOKEN: $token\n";
 if ($action ne "") {
     switch ($action)
     {
-      case "0"      {&logout(\@REQ_ARG)}
-      case "1"      {&login(\@REQ_ARG)}
-      case "2"      {&addUser(\@REQ_ARG)}
-      case "3"      {&completePayment(\@REQ_ARG)}
-      case "4"      {&findUser(\@REQ_ARG)}
-      case "5"      {&editUser(\@REQ_ARG)}
-      case "6"      {&deleteUser(\@REQ_ARG)}
+      case "0"      {&logout()}
+      case "1"      {&login()}
+      case "2"      {&addUser()}
+      case "3"      {&completePayment()}
+      case "4"      {&findUser()}
+      case "5"      {&editUser()}
+      case "6"      {&deleteUser()}
       case "7"      {&addTrack()}
-      case "9"      {&deleteTrack(\@REQ_ARG)}
+      case "9"      {&deleteTrack()}
       else          {print "Error invalid action"}
     }
   }  
 elsif ($token ne "") {
-    &streamTrack(\@REQ_ARG);
+    &streamTrack();
 }
 else {
       print "invalid request";
