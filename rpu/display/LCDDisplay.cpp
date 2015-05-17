@@ -1,9 +1,6 @@
-
-
 #include <stdlib.h>
 #include <stdexcept>
 #include <LCDDisplay.h>
-
 
 LCDDisplay::LCDDisplay() : Display()
 {
@@ -14,9 +11,9 @@ LCDDisplay::LCDDisplay() : Display()
 		std::cout << "Cannot open USB device on /dev/ttyusb0\n\n";
 		displayDevice = open("/dev/ttyUSB1", O_RDWR) ;
 		if( displayDevice == -1) {
-			printf( "Cannot open USB device on /dev/ttyusb1\n\n");
-				
-			throw std::invalid_argument( "Display Device not detected" );
+			std::cout <<  "Cannot open USB device on /dev/ttyusb1\n\n";
+			bool isConnected = false;	
+			//	throw std::invalid_argument( "Display Device not detected" );
 		}
 	}
 	std::cout << "file opened\n";
@@ -24,24 +21,21 @@ LCDDisplay::LCDDisplay() : Display()
 	displayOptionMode = (char) 254;
 	displayClear = (char) 1;
 	
-	
-
 	tcgetattr(displayDevice, &options);
 	cfsetispeed(&options, B9600);
 	cfsetospeed(&options, B9600);
 	tcsetattr(displayDevice, TCSANOW, &options);
 
-
 	blocks = (struct displayBlock *) malloc(sizeof(struct displayBlock)*4);
 	blocks[0].start = 0;	blocks[0].length = 1;
 	blocks[1].start = 1;	blocks[1].length = 15;
-	blocks[2].start = 16;	blocks[2].length = 16;
+	blocks[2].start = 64;	blocks[2].length = 16;
 	blocks[3].start = 0;	blocks[3].length = 32;
 
-	//display will enter option mode and wait for the next special character.
-	write(displayDevice, &displayOptionMode, sizeof(displayOptionMode));
-	//special command to clear the display screen
-	write(displayDevice, &displayClear, sizeof(displayClear));
+	//special character to enable  option mode, waits for the next special character.
+	write(displayDevice, &displayOptionMode, 1);
+	//special character to clear the display screen
+	write(displayDevice, &displayClear, 1);
 	std::cout << "clearing display" << std::endl;
 }
 
@@ -52,166 +46,61 @@ LCDDisplay::~LCDDisplay()
 
 void LCDDisplay::refresh()
 {
-	int currentChar;
 	char blockNumber1[1]={128};//first character of the display
-	char blockNumber2[1]={129};//2nd character of the display
-	char blockNumber3[1]={192};//10th character of the display
-	char displayOptionMode[1] = {254};
-	char displayClear[1] = {1};
-	char trackOutputString [4][16];
-	char menuOutputString [4][17];
-	char errorOutputString [1][33];
-	char playbackOutputString[1];
-	int tokenNumber;
-
+	char playbackOutputString[1]={0};
 	char playIcon[1]={62};
-	char pauseIcon[1]={219};
+	char pauseIcon[1]={4};
 	char rewindIcon[1]={127};
 	char fForwardIcon[1]={126};
-
-	for (int i=0;i>4;i++) {
-		playbackOutputString[0]=0;
-		trackOutputString[i][0]=0;
-		menuOutputString[i][0]=0;
-		errorOutputString[i][0]=0;
-	}
-
 	char *playbackString;
+	char *trackInfoString;
+	char *menuString;
+	char *errorString;
+
 	if (playbackIsDirty() && getPlaybackString(&playbackString) != NULL) {
-		tokenNumber=0;
 		std::cout << "playback Button Pressed\n";
 		int tokenSize = strlen(playbackString);
       		
 		switch(*playbackString){
 		case 'p':
-		
 			strncpy(playbackOutputString,playIcon,8);
-			std::cout << "play symbol" <<  std::endl;
 			break;
 		case 'w':
 			strncpy(playbackOutputString,pauseIcon,8);
-			std::cout << "Rewind symbol" <<  std::endl;
 			break;
 		case 'f':
 			strncpy(playbackOutputString,fForwardIcon,8);
-			std::cout << "Fastforward symbol" <<  std::endl;
 			break;
 		case 'r':
 			strncpy(playbackOutputString,rewindIcon,8);
-			std::cout << "Pause symbol" << std::endl;
 			break;
 		}
-
-		write(displayDevice, displayOptionMode, 1);
-		write(displayDevice, blockNumber1, sizeof(blockNumber1));
+		
+		write(displayDevice, &displayOptionMode, 1);
+		write(displayDevice, &blockNumber1, 1);
 		write(displayDevice, playbackOutputString, 1);
-
 		delete playbackString;
 		setPlaybackDirty(false);
 	}
 
-	char *trackInfoString;
+
 	if (trackInfoIsDirty() && getTrackInfoString(&trackInfoString) != NULL) {
-		tokenNumber=0;
-		std::cout << "Playing Track\n";
-		int tokenSize = strlen(trackInfoString);
-      		std::cout <<"size of the trackinfo string: " << tokenSize << std::endl;
-
-		for (int i = 0; i < tokenSize; i += 15) {
-			int tokenLength = (((tokenSize - i) >= 15) ? 15 : (tokenSize - i));
-			strncpy(trackOutputString[i/15], trackInfoString + i, tokenLength);
-			trackOutputString[i/15][tokenLength] = '\0';
-			std::cout << "tokenNumber: " << tokenNumber << std::endl;
-			tokenNumber++;
-		}
-
-		if(strlen(trackOutputString[tokenNumber-1]) <15) {
-			for (int l=strlen(trackOutputString[tokenNumber-1]);l<15;l++) {
-				trackOutputString[tokenNumber-1][l] = ' ';
-			}
-		}
-
-		for(int k=0;k<tokenNumber;k++) {
-			if (trackOutputString[k][0] != 0) {
-				std:: cout << " string contents: " << trackOutputString[k] <<std::endl;
-				write(displayDevice, displayOptionMode, 1);
-				write(displayDevice, blockNumber2, sizeof(blockNumber2));
-				write(displayDevice, trackOutputString[k], 15);
-				sleep(5);
-			}
-		}
+		writeBlock(1,trackInfoString);
 		delete trackInfoString;
 		setTrackInfoDirty(false);  
 	}
 
-	char *menuString;
+
 	if (menuIsDirty() && getMenuString(&menuString) != NULL) {
-		tokenNumber=0;
-		std::cout << "Scroll button detected\n";
-		int tokenSize = strlen(menuString);
-		std::cout <<"size of the menu string: " << tokenSize << std::endl;
-
-		for (int i = 0; i < tokenSize; i += 16) {
-			int tokenLength = (((tokenSize - i) >= 16) ? 16 : (tokenSize - i));
-			strncpy(menuOutputString[i/16], menuString + i, tokenLength);
-			menuOutputString[i/16][tokenLength] = '\0';
-			std::cout << "tokenNumber: " << tokenNumber << std::endl;
-			tokenNumber++;
-		}
-
-		if(strlen(menuOutputString[tokenNumber-1]) <16) {
-			for (int l=strlen(menuOutputString[tokenNumber-1]);l<=16;l++) {
-				menuOutputString[tokenNumber-1][l] = ' ';
-			}
-		}
-
-		for(int k=0;k<tokenNumber;k++) {
-			if (menuOutputString[k][0] != 0) {
-				std:: cout << " string contents: " << menuOutputString[k] <<std::endl;
-				write(displayDevice, displayOptionMode, sizeof(displayOptionMode));
-				write(displayDevice, blockNumber3, sizeof(blockNumber3));
-				write(displayDevice, menuOutputString[k], 16);
-				sleep(5);
-			}
-		}
+		std::cout <<"Contents of the menu string: " << menuString << std::endl;
+		writeBlock(2,menuString);
 		delete menuString;
 		setMenuDirty(false);  
 	}
 
-	char *errorString;
-	if (getErrorString(&errorString) != NULL) {
-		tokenNumber=0;
-		std::cout << "ERROR in Progress\n";
-		int tokenSize = strlen(errorString);
-		std::cout <<"size of the Error string: " << tokenSize << std::endl;
-		//display will enter option mode and wait for the next special character.
-		write(displayDevice, &displayOptionMode, 1);
-		//special command to clear the display screen
-		write(displayDevice, &displayClear, 1);
 	
-		for (int i = 0; i < tokenSize; i += 32) {
-			int tokenLength = (((tokenSize - i) >= 32) ? 32 : (tokenSize - i));
-			strncpy(errorOutputString[i/32], errorString + i, tokenLength);
-			errorOutputString[i/32][tokenLength] = '\0';
-			std::cout << "tokenNumber: " << tokenNumber << std::endl;
-			tokenNumber++;
-		}
-
-		if(strlen(errorOutputString[tokenNumber-1]) <32) {
-			for (int l=strlen(errorOutputString[tokenNumber-1]);l<32;l++) {
-				errorOutputString[tokenNumber-1][l] = ' ';
-			}
-		}
-
-		for(int k=0;k<tokenNumber;k++) {
-			if (errorOutputString[k][0] != 0) {
-				std:: cout << " string contents: " << errorOutputString[k] <<std::endl;
-				write(displayDevice, displayOptionMode, 1);
-				write(displayDevice, blockNumber1, sizeof(blockNumber1));
-				write(displayDevice, errorOutputString[k],32);
-				sleep(5);
-			}
-		}
+	if (getErrorString(&errorString) != NULL) {
+		writeBlock(3,errorString);
 		delete errorString;
 		setErrorString(NULL);
 	}
@@ -233,7 +122,8 @@ void LCDDisplay::writeBlock(int block, char *inputString)
 		strncpy(outputString[i/blockLength], inputString + i, tokenLength);
 		outputString[i/blockLength][tokenLength] = '\0'; // null terminate after the data we copied
 
-		std::cout << "tokenNumber: " << tokenNumber << "\n";
+		//	std::cout << "tokenNumber: " << tokenNumber << "\n";
+		std::cout << "writing string: " << outputString[tokenNumber] << std::endl;
 		tokenNumber++;
 	}
 	
@@ -247,7 +137,6 @@ void LCDDisplay::writeBlock(int block, char *inputString)
 	
 	for(int i=0; i < tokenNumber; i++) {
 		if (outputString[i][0] != 0) {
-			std:: cout << " string contents: " << outputString[i] <<"\n";
 			char pos = ((char) 128) + blocks[block].start;
 			write(displayDevice, &displayOptionMode, 1);
 			write(displayDevice, &pos, 1);

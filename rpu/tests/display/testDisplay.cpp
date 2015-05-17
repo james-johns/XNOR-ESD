@@ -9,10 +9,9 @@ int main(int argc, char **argv)
 	LCDDisplay *display = new LCDDisplay();
 	display->setPlaybackString("p");
 	display->refresh();
-  
-	display->setTrackInfoString("Now Playing: Exhibit ID 1010");
+  	display->setTrackInfoString("Now Playing: Exhibit ID 1010");
 	display->refresh();
-	display->setTrackInfoString("12:37 / 17:00");
+	display->setTrackInfoString("playing: EX1234");
 	display->refresh();
 	sleep(5);//imitates wait between listening and button press.
 	display->setPlaybackString("w");
@@ -20,7 +19,7 @@ int main(int argc, char **argv)
 	display->refresh();
 	display->setMenuString("Language:English");
 	display->refresh();
-	display->setMenuString("Language:French");
+	display->setMenuString("Language:Spanish");
 	display->refresh();
 	display->setMenuString("Language:German");
 	display->refresh();
@@ -38,13 +37,13 @@ int main(int argc, char **argv)
 	display->setPlaybackString("f");
 	display->setTrackInfoString("Fastforward");
 	display->refresh();
-	display->displayError("Unrecognised PIN Entered");
+	display->setErrorString("Unrecognised PIN Entered");
 	display->refresh();
-	display->displayError("Invalid Exhibit ID entered");
+	display->setErrorString("Invalid Exhibit ID entered");
 	display->refresh();
-	display->displayError("Wireless Signal Lost");
+	display->setErrorString("Wireless Signal Lost");
 	display->refresh();
-	display->displayError("Thanks for using  XNOR M.A.D.S");
+	display->setErrorString("Thanks for using  XNOR M.A.D.S");
 	display->refresh();
 	delete display;
 	printf("Done\n");
