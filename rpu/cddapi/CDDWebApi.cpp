@@ -1,7 +1,6 @@
-
-
 #include <CDDWebApi.h>
 #include <stdlib.h>
+
 /*! CDDWebApi::CDDWebApi(const char *cddIPAddr)
  * @author Thomas Deacon
  * @brief CDDWebApi Constructor
@@ -35,7 +34,7 @@ CDDWebApi::~CDDWebApi()
  * Original function written by Joachim Isaksson
  * Available at stackoverflow.com
  *
- * @param[ void ptr        Location of input
+ * @param void ptr        Location of input
  * @param size_t size     Size of input
  * @param size_t count    Occurances of input
  * @param void stream     Location of output
@@ -47,20 +46,92 @@ size_t writeToString (void *ptr, size_t size, size_t count, void *stream)
 	return size*count;
 }
 
+void CDDWebApi::filterResponse (std::string response)
+{
+	size_t identifier=response.find (":");
+	token = response.substr(0, identifier);
+	
+	identifier++;
+	size_t next = response.substr(identifier, response.length()).find(":");
+	std::string knowledgelvl = response.substr (identifier, next);
+	identifier+=next+1;
+	next=response.length();
+	std::string languages = response.substr (identifier, next);
+
+	identifier=0;
+	next=0;
+	supportedKLDescr.clear();
+	supportedKLID.clear();
+	size_t end = knowledgelvl.length();
+	while (next < end) {
+		next = knowledgelvl.substr(identifier, end).find (".");
+		supportedKLID.push_back(
+			knowledgelvl.substr (identifier, next));
+		identifier += next +1;
+
+		next = knowledgelvl.substr(identifier, end).find ("-");
+		supportedKLDescr.push_back 
+			(knowledgelvl.substr (identifier, next));
+		identifier += next +1;
+	}
+
+	identifier=0;
+	next=0;
+	supportedLangID.clear();
+	supportedLangDescr.clear();
+	end = languages.length();
+	while (next < end) {
+		next = languages.substr(identifier, end).find (".");
+		supportedLangID.push_back (languages.substr (identifier, next));
+		identifier += next +1;
+
+		next = languages.substr(identifier, end).find ("-");
+		supportedLangDescr.push_back 
+			(languages.substr (identifier, next));
+		identifier += next +1;
+	}
+	
+
+}
+
+std::string CDDWebApi::getToken()
+{
+	return token;
+}
+
+std::string CDDWebApi::getLastSentMessage()
+{
+	return lastSentMessage;
+}
+
+std::string CDDWebApi::getErr()
+{
+	return error;
+}
+
+std::vector<std::string> CDDWebApi::getSupportedLanguages()
+{
+	return supportedLangDescr;
+}
+
+std::vector<std::string> CDDWebApi::getSupportedKnowledgeLevels()
+{
+	return supportedKLDescr;
+}
+
 /*! CDDWebApi::login(char pin[4])
  * @author Thomas Deacon
  * @brief Sends login request to CDD and processes return data
  * 
  * @param[in] pin is a 4 digit pin used to authenticate the RPU
  */
-int CDDWebApi::login(char pin[4])
+int CDDWebApi::login(char newPin[4])
 {
 	// Check initialisation was successfull
-	if (!cdd)
+	if (!cdd) {
+		error = "COMMS INIT FAULT";
 		return -1;
-
-	//std::cout << "Init success!\n";
-	//std::cout << "IP:" << ipaddr << "\nPin:" << pin << "\n";
+	}
 
 	// Configure libCuRL to output response to a string
 	std::string toSend, response;
@@ -71,33 +142,32 @@ int CDDWebApi::login(char pin[4])
 	toSend = "http://";
 	toSend += ipaddr;
 	toSend += ":80/api.cgi?&action=1&pin=";
-	toSend += pin;
-
-	std::cout << "\nOutput: " << toSend << "\n";
+	toSend += newPin;
+	lastSentMessage = toSend;
 
 	// Send login request
 	curl_easy_setopt (cdd, CURLOPT_URL, toSend.c_str());
 	int errorCode = curl_easy_perform(cdd);
-	if (errorCode != CURLE_OK)
-	{
-		std::cout << "Error: " << errorCode << "\n";
-		std::cout << "See: http://curl.haxx.se/libcurl/c/libcurl-errors.html\n";
+	if (errorCode != CURLE_OK) {
+		error = "COMMS TRANSMISSION FAULT";
 		return -1;
 	}
 
-	std::cout << "\nResponse:\n" << response << "\n\n";
+	if (response.compare ("could not find a record <br>")==0){
+		error="INVALID PIN";
+		return -2;
+	}
+	else if (response.compare ("PIN number required<br>")==0){
+		error="MAULFORMED PIN";
+		return -2;
+	}
+	else if (response.compare ("invalid request")==0){
+		error="INVALID REQUEST";
+		return -2;
+	}
+	filterResponse(response);
 
-	// Check response
-	/*size_t firstLine = response.find ("\n");
-	if (response.substr (0, firstLine).compare ("HTTP/1.1 200 OK")==0) {
-		// Auth Successful, copy token
-		strncpy (token, response.substr
-			 (firstLine+1, firstLine+6).c_str(), 5);
-		return 0;
-	} else {
-		// failed
-		return -1;
-		} */
+	strncpy (pin, newPin, 4);
 	return 0;    
 	
 }
@@ -108,7 +178,7 @@ int CDDWebApi::login(char pin[4])
  */
 void CDDWebApi::logout()
 {
-	strncpy (token, "    \0", 5);
+	//strncpy (token, "    \0", 5);
 }
 
 int CDDWebApi::requestAudioStream(char trackID[4])
@@ -133,18 +203,6 @@ int CDDWebApi::requestAudioStream(char trackID[4])
 	curl_easy_setopt (cdd, CURLOPT_URL, toSend.c_str());
 	curl_easy_perform(cdd);
 
-	// Check response
-	size_t firstLine = response.find ("\n");
-	if (response.substr (0, firstLine).compare ("HTTP/1.1 200 OK")==0) {
-		// Auth Successful, copy token
-		strncpy (token, response.substr
-			 (firstLine+1, firstLine+6).c_str(), 5);
-		return 0;
-	} else {
-		// failed
-		return -1;
-	}     
-
 }
 int CDDWebApi::changeLanguage(int language)
 {
@@ -156,4 +214,6 @@ int CDDWebApi::changeKnowledgeLevel(int knowledge)
 	knowledgeCode = knowledge;
 	return 0;
 }
+
+
 
