@@ -76,7 +76,8 @@ void LCDDisplay::refresh()
 		errorOutputString[i][0]=0;
 	}
 
-	if (playbackDirty == true & playbackString != NULL) {
+	char *playbackString;
+	if (playbackIsDirty() && getPlaybackString(&playbackString) != NULL) {
 		tokenNumber=0;
 		std::cout << "playback Button Pressed\n";
 		int tokenSize = strlen(playbackString);
@@ -104,10 +105,13 @@ void LCDDisplay::refresh()
 		write(displayDevice, displayOptionMode, 1);
 		write(displayDevice, blockNumber1, sizeof(blockNumber1));
 		write(displayDevice, playbackOutputString, 1);
-		playbackDirty = false;
+
+		delete playbackString;
+		setPlaybackDirty(false);
 	}
 
-	if (trackInfoDirty == true & trackInfoString != NULL) {
+	char *trackInfoString;
+	if (trackInfoIsDirty() && getTrackInfoString(&trackInfoString) != NULL) {
 		tokenNumber=0;
 		std::cout << "Playing Track\n";
 		int tokenSize = strlen(trackInfoString);
@@ -136,10 +140,12 @@ void LCDDisplay::refresh()
 				sleep(5);
 			}
 		}
-		trackInfoDirty = false;  
+		delete trackInfoString;
+		setTrackInfoDirty(false);  
 	}
 
-	if (menuDirty == true & menuString != NULL) {
+	char *menuString;
+	if (menuIsDirty() && getMenuString(&menuString) != NULL) {
 		tokenNumber=0;
 		std::cout << "Scroll button detected\n";
 		int tokenSize = strlen(menuString);
@@ -168,10 +174,12 @@ void LCDDisplay::refresh()
 				sleep(5);
 			}
 		}
-		menuDirty = false;  
+		delete menuString;
+		setMenuDirty(false);  
 	}
 
-	if (errorString != NULL) {
+	char *errorString;
+	if (getErrorString(&errorString) != NULL) {
 		tokenNumber=0;
 		std::cout << "ERROR in Progress\n";
 		int tokenSize = strlen(errorString);
@@ -204,7 +212,8 @@ void LCDDisplay::refresh()
 				sleep(5);
 			}
 		}
-		errorString = NULL;
+		delete errorString;
+		setErrorString(NULL);
 	}
 }
 

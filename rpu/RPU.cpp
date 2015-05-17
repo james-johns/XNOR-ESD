@@ -56,7 +56,7 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 
 	// connect to NCurses display by default
 	display = new NCursesDisplay();
-	display->displayError("Please enter PIN to unlock");
+	display->setErrorString("Please enter PIN to unlock");
 
 	/*! Event queue must be initialised before threads as they depend on sending events to RPU */
 	eventQueue = new std::queue<Event *>();
@@ -188,7 +188,7 @@ std::vector<char *> *RPU::getIPAddress()
 
 void RPU::loginPrompt(Event *evt)
 {
-	display->displayError("Please enter PIN to unlock");
+	display->setErrorString("Please enter PIN to unlock");
 	switch (evt->getType()) {
 	case Event::KEYPAD_INPUT:
 		switch (*(char *)evt->getArguments()) {
@@ -199,7 +199,7 @@ void RPU::loginPrompt(Event *evt)
 			/* enter selected menu entry */
 			state = DISPLAY_MENU;
 			display->setMenuString(mainMenu->getCurrentMenuItem());
-			display->displayError(NULL);
+			display->setErrorString(NULL);
 			break;
 		case '1' ... '9':
 			/* capture PIN input */
@@ -240,7 +240,7 @@ void RPU::displayMenu(Event *evt)
 			break;
 		case 'q':
 			state = LOGIN_PROMPT;
-			display->displayError("Please enter PIN to unlock");
+			display->setErrorString("Please enter PIN to unlock");
 			display->setMenuString(NULL);
 			display->setPlaybackString(NULL);
 			display->setTrackInfoString(NULL);

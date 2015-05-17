@@ -25,29 +25,51 @@ NCursesDisplay::~NCursesDisplay()
 
 void NCursesDisplay::refresh()
 {
-	if (errorDirty) {
+	char *errorString;
+	if (errorIsDirty()) {
+		getErrorString(&errorString);
+
 		wclear(errorWin);
 		if (errorString != NULL) wprintw(errorWin, errorString);
 		wrefresh(errorWin);
-		errorDirty = false;
+
+		delete errorString;
+		setErrorDirty(false);
 	}
-	if (menuDirty) {
+
+	char *menuString;
+	if (menuIsDirty()) {
+		getMenuString(&menuString);
+
 		wclear(menuWin);
 		if (menuString != NULL) wprintw(menuWin, menuString);
 		wrefresh(menuWin);
-		menuDirty = false;
+		
+		delete menuString;
+		setMenuDirty(false);
 	}
-	if (playbackDirty) {
+
+	char *playbackString;
+	if (playbackIsDirty()) {
+		getPlaybackString(&playbackString);
 		wclear(playWin);
 		if (playbackString != NULL) wprintw(playWin, playbackString);
 		wrefresh(playWin);
-		playbackDirty = false;
+		
+		delete playbackString;
+		setPlaybackDirty(false);
 	}
-	if (trackInfoDirty) {
+
+	char *trackInfoString;
+	if (trackInfoIsDirty()) {
+		getTrackInfoString(&trackInfoString);
+
 		wclear(trackWin);
 		if (trackInfoString != NULL) wprintw(trackWin, trackInfoString);
 		wrefresh(trackWin);
-		trackInfoDirty = false;
+
+		delete trackInfoString;
+		setTrackInfoDirty(false);
 	}
 	wrefresh(stdscr);
 }
