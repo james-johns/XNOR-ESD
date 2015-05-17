@@ -68,28 +68,28 @@ sub login
     {
       print "$token";
       print ':';
-      $sth = $CDSHandle->prepare("SELECT knowledgeLvl FROM ESD.KnowledgeLvl;");
+      $sth = $CDSHandle->prepare("SELECT * FROM ESD.KnowledgeLvl;");
       $sth->execute
         or die "SQL Error: $DBI::errstr\n";
       
       my $row;
       my $message = '';
-      while ($row = $sth->fetchrow_array)
+      while (@row = $sth->fetchrow_array)
       {  # retrieve one row
-         $message .= $row . '-';
+         $message .= join(".", @row) . '-';
       }
       $message = substr($message, 0, -1);
       print "$message";
       
       print ':';
-      $sth = $CDSHandle->prepare("SELECT language FROM ESD.Language;");
+      $sth = $CDSHandle->prepare("SELECT * FROM ESD.Language;");
       $sth->execute
         or die "SQL Error: $DBI::errstr\n";
       
       $message = '';
-      while ($row = $sth->fetchrow_array)
+      while (@row = $sth->fetchrow_array)
       {  # retrieve one row
-         $message .= $row . '-';
+         $message .= join(".", @row) . '-';
       }
       $message = substr($message, 0, -1);
       print "$message";     
