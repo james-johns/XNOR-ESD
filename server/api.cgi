@@ -337,6 +337,7 @@ sub stream_audio_track
 	if (($pid = fork()) == 0) {
 	    close(STDOUT);
 	    close(STDERR);
+	    close(STDIN);
 	    open(STDOUT, ">", $logfile);
 	    open(STDERR, ">", $logfile);
 	    exec("gst-launch-1.0", "filesrc", "location=$file", "!", 
