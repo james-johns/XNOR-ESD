@@ -6,12 +6,12 @@ export DEVICE=wlan0
 
 # Specify SSID and Channel
 export SSID1=NETGEAR
-export SSID2=NOTGEAR
-export SSID3=LANGEAR
+#export SSID2=NOTGEAR
+#export SSID3=LANGEAR
 
 export CHANNEL1=6
-export CHANNEL2=6
-export CHANNEL3=6
+#export CHANNEL2=6
+#export CHANNEL3=6
 
 #Specify CDD Address
 export CDDIP=8.8.8.8
@@ -55,27 +55,27 @@ while true; do
 		fi
 	fi	
 			
-	ping -q -c2 $CDDIP > /dev/null  
-	if [ $? -eq 1 ]; then
-		ifconfig wlan0 up;
-		echo "connecting with $SSID2 on channel $CHANNEL2"
-		# Associate with AP			
-		if  iwconfig $DEVICE essid $SSID2 channel $CHANNEL2; then
-			udhcpc -i $DEVICE
-			echo "Connection to $SSID2 succesfull "
-		fi
-	fi
+#	ping -q -c2 $CDDIP > /dev/null  
+#	if [ $? -eq 1 ]; then
+#		ifconfig wlan0 up;
+#		echo "connecting with $SSID2 on channel $CHANNEL2"
+#		# Associate with AP			
+#		if  iwconfig $DEVICE essid $SSID2 channel $CHANNEL2; then
+#			udhcpc -i $DEVICE
+#			echo "Connection to $SSID2 succesfull "
+#		fi
+#	fi
 			
-	ping -q -c2 $CDDIP > /dev/null  
-	if [ $? -eq 1 ]; then
-		ifconfig wlan0 up;
-		echo "connecting with $SSID3 on channel $CHANNEL3"
-		# Associate with AP
-		if  iwconfig $DEVICE essid $SSID3 channel $CHANNEL3; then
-			udhcpc -i $DEVICE
-			echo "Connection to $SSID3 succesfull "
-		fi
-	fi
+#	ping -q -c2 $CDDIP > /dev/null  
+#	if [ $? -eq 1 ]; then
+#		ifconfig wlan0 up;
+#		echo "connecting with $SSID3 on channel $CHANNEL3"
+#		# Associate with AP
+#		if  iwconfig $DEVICE essid $SSID3 channel $CHANNEL3; then
+#			udhcpc -i $DEVICE
+#			echo "Connection to $SSID3 succesfull "
+#		fi
+#	fi
 			
 	ping -q -c2 $CDDIP > /dev/null  
 	if [ $? -eq 1 ]; then
@@ -88,11 +88,7 @@ while true; do
 	echo "Connected to Router with MAC Address:"	
 	iwlist wlan0 scan | awk '/Address:/ {print $5}'	
 	fi
-		
-		
-	
-	
-		
+							
 	sleep 1
 done
    
