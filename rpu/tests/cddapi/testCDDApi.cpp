@@ -26,6 +26,16 @@ int main (void)
 	    loop++;
 	  }
 	}
+
+	std::cout << "\n\nPlayback Request:";
+	test->changeLanguage(0);
+	test->changeKnowledgeLevel(0);
+	test->requestAudioStream("1111");
+	std::cout << test->getLastSentMessage() << "\n";
+
+	std::cout << "\n\nLogout:";
+	test->logout();
+	std::cout << test->getLastSentMessage() << "\n";
 	delete test;
 	return 0;
 }

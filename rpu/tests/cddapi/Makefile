@@ -4,7 +4,7 @@
 obj-y:=../../cddapi/CDDWebApi.o testCDDApi.o
 
 CROSS_COMPILE?=
-DEBUG?=
+DEBUG?=-g
 
 
 CC:=$(CROSS_COMPILE)gcc

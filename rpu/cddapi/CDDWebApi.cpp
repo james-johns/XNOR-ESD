@@ -46,24 +46,38 @@ size_t writeToString (void *ptr, size_t size, size_t count, void *stream)
 	return size*count;
 }
 
+/*! void CDDWebApi::filterResponse (std::string response)
+ * @author Thomas Deacon
+ * @brief Takes an input string and breaks it up into appropriate strings
+ *
+ * @param response[in] The response from the CDD to be filtered
+ */
 void CDDWebApi::filterResponse (std::string response)
 {
+	// Search for first seperator to identify end of token
 	size_t identifier=response.find (":");
 	token = response.substr(0, identifier);
 	
+	// Search for next seperator to copy knowledge levels
 	identifier++;
 	size_t next = response.substr(identifier, response.length()).find(":");
 	std::string knowledgelvl = response.substr (identifier, next);
+
+	// Search for next seperator to copy languages
 	identifier+=next+1;
 	next=response.length();
 	std::string languages = response.substr (identifier, next);
 
+	// Reset variables for new string
 	identifier=0;
 	next=0;
 	supportedKLDescr.clear();
 	supportedKLID.clear();
 	size_t end = knowledgelvl.length();
+	
+	// Loop until end of string
 	while (next < end) {
+
 		next = knowledgelvl.substr(identifier, end).find (".");
 		supportedKLID.push_back(
 			knowledgelvl.substr (identifier, next));
@@ -143,6 +157,7 @@ int CDDWebApi::login(char newPin[4])
 	toSend += ipaddr;
 	toSend += ":80/api.cgi?&action=1&pin=";
 	toSend += newPin;
+	lastSentMessage.clear();
 	lastSentMessage = toSend;
 
 	// Send login request
@@ -178,7 +193,24 @@ int CDDWebApi::login(char newPin[4])
  */
 void CDDWebApi::logout()
 {
-	//strncpy (token, "    \0", 5);
+	// Configure libCuRL to output response to a string
+	std::string toSend, response;
+	curl_easy_setopt (cdd, CURLOPT_WRITEFUNCTION, writeToString);
+	curl_easy_setopt (cdd, CURLOPT_WRITEDATA, &response);
+	
+	// Construct a string to request a login
+	toSend = "http://";
+	toSend += ipaddr;
+	toSend += ":80/api.cgi?&action=0&pin=";
+	toSend += pin;
+	lastSentMessage.clear();
+	lastSentMessage = toSend;
+
+	// Send login request
+	curl_easy_setopt (cdd, CURLOPT_URL, toSend.c_str());
+	curl_easy_perform(cdd);
+
+
 }
 
 int CDDWebApi::requestAudioStream(char trackID[4])
@@ -195,23 +227,30 @@ int CDDWebApi::requestAudioStream(char trackID[4])
 	// Construct a string to request a track
 	toSend = "http://";
 	toSend += ipaddr;
+	toSend += ":80/api.cgi?&token=";
 	toSend += token;
+	toSend += "&trackid=";
+	toSend += trackID;
+	toSend += "&language=";
 	toSend += languageCode;
+	toSend += "&knowledge=";
 	toSend += knowledgeCode;
 
 	// Send login request
 	curl_easy_setopt (cdd, CURLOPT_URL, toSend.c_str());
 	curl_easy_perform(cdd);
+	lastSentMessage.clear();
+	lastSentMessage = toSend;
 
 }
 int CDDWebApi::changeLanguage(int language)
 {
-	languageCode = language;
+	languageCode = supportedLangID[language];
 	return 0;
 }
 int CDDWebApi::changeKnowledgeLevel(int knowledge)
 {
-	knowledgeCode = knowledge;
+	knowledgeCode = supportedKLID[knowledge];
 	return 0;
 }
 

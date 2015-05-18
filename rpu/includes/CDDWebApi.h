@@ -48,8 +48,8 @@ private:
 	CURL *cdd;
 	char *ipaddr;
 	char lastTrackID[4];
-	char pin[4];
-	int languageCode, knowledgeCode;
+	char pin[5];
+	std::string languageCode, knowledgeCode;
 };
 
 
