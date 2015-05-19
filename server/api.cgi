@@ -334,7 +334,9 @@ sub stream_audio_track
 {
     my $file      = @_[0];
     my $target_ip = @_[1];
-    my $id = "test";
+    my $id = $target_ip;
+
+    debugPrint "RPU ID = $id\n";
 
     if (-e $file) {
 	my $tel = new Net::Telnet(Port => "4212");
@@ -346,7 +348,8 @@ sub stream_audio_track
 	$tel->cmd("del $id"); 
 	$tel->cmd("new $id vod enabled");
 	$tel->cmd("setup $id input $file");
-	
+	$tel->cmd("quit");
+
     } else {
 	print "\n\nError Audio track does not exist\n";
 	print "$file";
