@@ -55,7 +55,7 @@ sub login
     my $dateTime = localtime->strftime('%m/%d/%Y');
     my $token = md5_hex($dateTime);
     my $CDSHandle = &connectCDS();
-    my $sth = $CDSHandle->prepare("SELECT pin FROM ESD.RPU WHERE pin='$pin';");
+    my $sth = $CDSHandle->prepare("SELECT RPU FROM ESD.Session WHERE RPU='$pin';");
     $sth->execute
       or die "SQL Error: $DBI::errstr\n";
      
@@ -112,7 +112,6 @@ sub addUser
   my $CDSHandle;
   my @fullname = split( /-/, $q->param('fullname'));
   my $address = $q->param('address');
-  my $language = $q->param('language');
   my $mobile = $q->param('mobilenum');
   if (!@fullname)
   {
@@ -140,63 +139,46 @@ sub completePayment
   my @payment = split(/ /, $q->param('paymentdetails'));
   if (!$userid && !@payment)
   {
-    print "User ID and payment details are required!\n";
+    print "!\n";
+    return;
   }
-  else
+  
+  $CDSHandle = &connectCDS();
+  my $query = '';
+    
+  # creating a new transaction entry
+  # Message body has to start at the beginning of the line
+  my $idTransaction;
+  if (($payment[1] ne '!') && ($payment[0] ne '!'))
   {
-    $CDSHandle = &connectCDS();
-    my $query = '';
-    # Getting the payment type id
-    my $sth = $CDSHandle->prepare("SELECT idPaymentType FROM ESD.PaymentType WHERE paymentType='$payment[1]';");
-    $sth->execute
-      or die "SQL Error: $DBI::errstr\n";
-       
-    #my $paymentMethodId = $sth->fetch();
-    my @paymentMethodId = $sth->fetchrow_array();
-    if (@paymentMethodId eq "")
-    {
-      print "could not find a record\n";
-    }
-    else
-    {
-    
-    #generate random 4 digit number
-    $rpuPin = int(rand(9999)) + "0000";
-    $CDSHandle->do("INSERT INTO ESD.RPU (pin) VALUES ($rpuPin);")
-        or die "SQL Error: $DBI::errstr\n";
-    #creating a new RPU entry - shit idea, but for now ok  
-
-    
-
-    # Message body has to start at the beginning of the line
-    
-    #creating a new transaction entry
-    
-    # Message body has to start at the beginning of the line
     $query = << 'END_MESSAGE';
-INSERT INTO ESD.Transaction (transaction, idPaymentType, date, time)
-VALUES (?,?,?,?)            
+INSERT INTO ESD.Transaction (transaction, paymentType)
+VALUES (?,?)            
 END_MESSAGE
-
-    $CDSHandle->do($query, undef, $payment[0], $paymentMethodId[0], $payment[1], $payment[2])
-        or die "SQL Error: $DBI::errstr\n";
-    my $idTransaction = $CDSHandle->last_insert_id(undef, undef,undef, undef);
-    
-    # create a new session entry
-    $query = '';
-    # Message body has to start at the beginning of the line
-#    $query = << 'END_MESSAGE';
-#INSERT INTO ESD.Session (idClient, idTransaction, idRPU, date, timeIn)
-#VALUES (?,?,?,?)            
-#END_MESSAGE
-    
-    print "$query";
-    
-    #$CDSHandle->do('INSERT INTO ESD.Client (forename, surname, mobilePhone, address) VALUES (?,?,?,?)',
-      #undef, $fullname[0], $fullname[1], $mobile, $address)
-       # or die "SQL Error: $DBI::errstr\n";
-   } 
+    $CDSHandle->do($query, undef, $payment[0], $payment[1])
+      or die "SQL Error: $DBI::errstr\n";
+    $idTransaction = $CDSHandle->last_insert_id(undef, undef,undef, undef);  
   }
+  
+  # create a new session entry
+  $query = '';
+  # Message body has to start at the beginning of the line
+  $query = << 'END_MESSAGE';
+INSERT INTO ESD.Session (idClient, idTransaction, RPU)
+VALUES (?,?,?)            
+END_MESSAGE
+  
+  #generate random 4 digit number
+  $rpuPin = "";
+  for (1..4)
+  {
+    $rpuPin .= 1 + int(rand(8));
+  }
+  
+  $CDSHandle->do($query, undef, $userid, $idTransaction, $rpuPin)
+    or die "SQL Error: $DBI::errstr\n";
+ 
+  print "$query";    
 }
 
 #################################################################
