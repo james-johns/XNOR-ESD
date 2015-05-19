@@ -48,7 +48,7 @@ sub login
 
   if (!$pin)
   {
-    print "PIN number required<br>";
+    print "!\n";
   }
   else
   {
@@ -63,7 +63,7 @@ sub login
     
     if (@$found eq "")
     {
-      print "could not find a record <br>";
+      print "!\n";
     }
     else
     {
@@ -178,7 +178,7 @@ END_MESSAGE
   $CDSHandle->do($query, undef, $userid, $idTransaction, $rpuPin)
     or die "SQL Error: $DBI::errstr\n";
  
-  print "$query";    
+  print "$rpuPin\n";    
 }
 
 #################################################################
