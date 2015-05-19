@@ -7,13 +7,15 @@
 #include <iostream>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <termios.h>
 #include <fcntl.h>
 #include <stdio.h>
 
 struct displayBlock {
-	int start, length;
+	int start, length, scrollPosition;
+struct timeval lastTime;
 };
 
 class LCDDisplay : public Display {
@@ -22,14 +24,14 @@ public:
 	~LCDDisplay();
 
 	void refresh();
-	
+	bool isConnected();
 private:
 	void writeBlock(int block, char *inputString);
 
 	int displayDevice; // file descriptor of connected device
 	struct displayBlock *blocks;
 
-	char displayOptionMode; // special control character for configuring display
+	unsigned char displayOptionMode; // special control character for configuring display
 	char displayClear; // character to write after displayOptionMode to clear the entire display
 
 };

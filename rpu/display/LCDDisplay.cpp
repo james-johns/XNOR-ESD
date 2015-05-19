@@ -1,10 +1,14 @@
 #include <stdlib.h>
 #include <stdexcept>
 #include <LCDDisplay.h>
+#include <sys/time.h>
 
 LCDDisplay::LCDDisplay() : Display()
-{
-	struct termios options;
+{	struct termios options;
+	displayOptionMode = (unsigned char) 254;
+	displayClear = (char) 1;
+       
+
 	std::cout << "opening ttyUSB0\n";
 	displayDevice = open("/dev/ttyUSB0", O_RDWR) ;
 	if( displayDevice == -1) {
@@ -12,14 +16,10 @@ LCDDisplay::LCDDisplay() : Display()
 		displayDevice = open("/dev/ttyUSB1", O_RDWR) ;
 		if( displayDevice == -1) {
 			std::cout <<  "Cannot open USB device on /dev/ttyusb1\n\n";
-			bool isConnected = false;	
-			//	throw std::invalid_argument( "Display Device not detected" );
 		}
 	}
 	std::cout << "file opened\n";
-
-	displayOptionMode = (char) 254;
-	displayClear = (char) 1;
+	
 	
 	tcgetattr(displayDevice, &options);
 	cfsetispeed(&options, B9600);
@@ -27,10 +27,14 @@ LCDDisplay::LCDDisplay() : Display()
 	tcsetattr(displayDevice, TCSANOW, &options);
 
 	blocks = (struct displayBlock *) malloc(sizeof(struct displayBlock)*4);
-	blocks[0].start = 0;	blocks[0].length = 1;
-	blocks[1].start = 1;	blocks[1].length = 15;
-	blocks[2].start = 64;	blocks[2].length = 16;
-	blocks[3].start = 0;	blocks[3].length = 32;
+	blocks[0].start = 0;	blocks[0].length = 1;  
+	blocks[0].scrollPosition=0; gettimeofday(&blocks[0].lastTime,NULL);
+	blocks[1].start = 1;	blocks[1].length = 15; 
+	blocks[1].scrollPosition=0; gettimeofday(&blocks[1].lastTime,NULL);
+	blocks[2].start = 64;	blocks[2].length = 16; 
+	blocks[2].scrollPosition=0; gettimeofday(&blocks[2].lastTime,NULL);
+	blocks[3].start = 0;	blocks[3].length = 32; 
+	blocks[3].scrollPosition=0; gettimeofday(&blocks[3].lastTime,NULL);
 
 	//special character to enable  option mode, waits for the next special character.
 	write(displayDevice, &displayOptionMode, 1);
@@ -42,6 +46,11 @@ LCDDisplay::LCDDisplay() : Display()
 LCDDisplay::~LCDDisplay()
 {
 	close(displayDevice);
+}
+
+bool LCDDisplay::isConnected()
+{
+	return (displayDevice != -1);
 }
 
 void LCDDisplay::refresh()
@@ -56,6 +65,17 @@ void LCDDisplay::refresh()
 	char *trackInfoString;
 	char *menuString;
 	char *errorString;
+	//time_t currentTime = (time(NULL));
+
+	struct timeval currentTime;
+	gettimeofday(&currentTime,NULL);
+
+//	if (blocks[0].lastTime < currentTime -1){
+	if ((((blocks[0].lastTime.tv_sec*1000000)+blocks[0].lastTime.tv_usec)+500000) < 
+	    ((currentTime.tv_sec*1000000)+currentTime.tv_usec)) {
+		setPlaybackDirty(true);
+
+	}
 
 	if (playbackIsDirty() && getPlaybackString(&playbackString) != NULL) {
 		std::cout << "playback Button Pressed\n";
@@ -83,11 +103,28 @@ void LCDDisplay::refresh()
 		setPlaybackDirty(false);
 	}
 
+	if (trackInfoIsDirty()==true){
+		blocks[1].scrollPosition=0;
+	}
+	else if ((((blocks[1].lastTime.tv_sec*1000000)+blocks[1].lastTime.tv_usec)+500000) < 
+		 ((currentTime.tv_sec*1000000)+currentTime.tv_usec)) {
+//	else if (blocks[1].lastTime < currentTime -1){
+		setTrackInfoDirty(true);
+	}
 
 	if (trackInfoIsDirty() && getTrackInfoString(&trackInfoString) != NULL) {
 		writeBlock(1,trackInfoString);
 		delete trackInfoString;
 		setTrackInfoDirty(false);  
+	}
+
+	if (menuIsDirty()==true){
+		blocks[2].scrollPosition=0;
+	}
+	else if ((((blocks[2].lastTime.tv_sec*1000000)+blocks[2].lastTime.tv_usec)+500000) < 
+		 ((currentTime.tv_sec*1000000)+currentTime.tv_usec)) {
+//	else {if (blocks[2].lastTime < currentTime -1){
+		setMenuDirty(true);
 	}
 
 
@@ -113,36 +150,55 @@ void LCDDisplay::writeBlock(int block, char *inputString)
 	int blockLength = blocks[block].length;
 	int inputStringLength = strlen(inputString);
 
+	std::string inputData(inputString);
+	
 	std::cout << "writing block: " << block << std::endl;
 	std::cout << "size of input string: " << inputStringLength << std::endl;
 	
-	for (int i = 0; i < inputStringLength; i += blocks[block].length) {
-		int tokenLength = (((inputStringLength - i) >= blockLength) ? blockLength : (inputStringLength - i));
-
-		strncpy(outputString[i/blockLength], inputString + i, tokenLength);
-		outputString[i/blockLength][tokenLength] = '\0'; // null terminate after the data we copied
-
-		//	std::cout << "tokenNumber: " << tokenNumber << "\n";
-		std::cout << "writing string: " << outputString[tokenNumber] << std::endl;
-		tokenNumber++;
-	}
+	unsigned char pos = ((unsigned char) 128) + blocks[block].start;
+	//std::cout<< "size of pos: " << (int)pos <<std::endl;
+	write(displayDevice, &displayOptionMode, 1);
+	write(displayDevice, &pos, 1);
+			
+	int j=blocks[block].scrollPosition;
+	int writeLength = (inputData.length() -j <  blocks[block].length) ? inputData.length()-j : blocks[block].length;
+	std::cout << "write Length " << writeLength << std::endl;
+	std::cout << "writing scroll string: " << inputData.substr(j, blocks[block].length).c_str() << std::endl;
 	
-	int lastTokenLength = strlen(outputString[tokenNumber - 1]);
-	if(lastTokenLength < blockLength) {
-		for (int i = lastTokenLength; i < blockLength; i++) {
-			outputString[tokenNumber - 1][i] = ' ';
-		}
-		outputString[tokenNumber - 1][blockLength] = '\0'; // ensure the output string is null terminated
-	}
 	
-	for(int i=0; i < tokenNumber; i++) {
-		if (outputString[i][0] != 0) {
-			char pos = ((char) 128) + blocks[block].start;
-			write(displayDevice, &displayOptionMode, 1);
-			write(displayDevice, &pos, 1);
-			write(displayDevice, outputString[i], strlen(outputString[i]));
-			sleep(5);
+	/*if (inputData.length() <= blocks[block].length){	
+	  for (int i = inputData.length();i<blocks[block].length;i++)
+	    {
+	      inputData[i]=' ';
+	      writeLength = i;
+	    }
+	    }*/
+	std::cout << "[1] input Length  " << inputData.length() << std::endl;
+	std::cout << "[2] block Length  " << blocks[block].length << std::endl;
+	std::cout << "[3] write Length  " << writeLength << std::endl;
+	std::cout << "[4] string Contents  " << inputData << std::endl;
+	
+	if (write(displayDevice, inputData.substr(j, blocks[block].length).c_str(), writeLength) == -1)
+		perror("Write didn't work");
+     	
+	if (inputData.length() >= blocks[block].length || writeLength > blocks[block].length) {  	  
+	  write(displayDevice, " ",1);
+	  write(displayDevice, inputData.c_str(), blocks[block].length-writeLength-1);
+	}
+
+	if (inputData.length() > blocks[block].length){
+	struct timeval currentTime;
+	gettimeofday(&currentTime, NULL);
+	if ((((blocks[block].lastTime.tv_sec*1000000)+blocks[block].lastTime.tv_usec)+500000) < 
+	    ((currentTime.tv_sec*1000000)+currentTime.tv_usec)) {
+		blocks[block].scrollPosition++;
+		if (blocks[block].scrollPosition >= inputData.length()){
+			blocks[block].scrollPosition = 0;
+	      
 		}
+		gettimeofday(&blocks[block].lastTime, NULL);
+	}
+		
 	}
 }
 
