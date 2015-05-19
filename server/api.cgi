@@ -336,9 +336,20 @@ sub stream_audio_track
 	print "\n\nError Audio track does not exist\n";
 	print "$file";
     }
-    return $pid;
 }
 
+
+################################################################
+### broadcast();
+sub broadcast
+{
+    my $file = "$audio_base_path/111111.ogg";
+    my $id = "broadcast";
+
+    stream_audio_track($file, $id);
+
+    
+}
 
 #################################################################
 
@@ -377,6 +388,7 @@ if ($action ne "") {
       case "5"      {&editUser()}
       case "6"      {&deleteUser()}
       case "7"      {&addTrack()}
+      case "8"      {&broadcast()}
       case "9"      {&deleteTrack()}
       else          {print "Error invalid action"}
     }
