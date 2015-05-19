@@ -285,7 +285,9 @@ void RPU::selectLanguage(Event *evt)
 			}
 			break;
 		case 'f': /*!< Fast Forward */
-			/* TODO: fast forward audio player */
+		  if (player != NULL) {
+		    player->fastForward();
+		  }
 			break;
 		case 'q':
 			state = DISPLAY_MENU;
@@ -328,7 +330,9 @@ void RPU::selectKnowledge(Event *evt)
 			}
 			break;
 		case 'f':/*!< Fast Forward */
-			/* TODO: fast forward audio player */
+		  if(player != NULL) {
+		    player->fastForward();
+		  }
 			break;
 		case 'q':
 			state = DISPLAY_MENU;
@@ -371,7 +375,9 @@ void RPU::requestStream(Event *evt)
 			}
 			break;
 		case 'f':/*!< Fast Forward */
-			/* TODO: fast forward audio player */
+		  if (player != NULL) {
+		    player->fastForward();
+		  }
 			break;
 		case 'q': /* cancel key - return to menu */
 			state = DISPLAY_MENU;
