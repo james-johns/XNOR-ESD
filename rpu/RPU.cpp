@@ -19,6 +19,7 @@
 #include <NCursesDisplay.h>
 #include <Menu.hpp>
 #include <VLCAudioPlayer.h>
+#include <CDDWebApi.h>
 
 /*! RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
  * @author James Johns
@@ -40,6 +41,8 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 	delete addresses;
 	player = new VLCAudioPlayer(ipaddr);
 	delete ipaddr;
+
+	cddapi = new CDDWebApi("10.0.0.1");
 
 	mainMenu = new Menu();
 	mainMenu->addMenuItem("Enter Exhibit");
@@ -86,6 +89,7 @@ RPU::~RPU()
 	delete player;
 	delete input;
 	delete display;
+	delete cddapi;
 }
 
 /*! RPU::tick()
@@ -197,12 +201,19 @@ void RPU::loginPrompt(Event *evt)
 			break;
 		case 'c':/*!< Enter key */
 			/* enter selected menu entry */
-			state = DISPLAY_MENU;
-			display->setMenuString(mainMenu->getCurrentMenuItem());
-			display->setErrorString(NULL);
+			if (cddapi->login(numberInput.c_str()) == 0) {
+				state = DISPLAY_MENU;
+				display->setMenuString(mainMenu->getCurrentMenuItem());
+				display->setErrorString(NULL);
+			} else {
+				display->setErrorString("Invalid Pin");
+			}
 			break;
 		case '1' ... '9':
 			/* capture PIN input */
+			numberInput.push_back(*(char *)evt->getArguments());
+			if (numberInput.length() > 4) // pop data from front of string to reduce to 4 character string
+				numberInput.erase(0, numberInput.length() - 4);
 			break;
 		case 'p':/*!< play */
 		case 'r':/*!< rewind */
@@ -257,8 +268,13 @@ void RPU::displayMenu(Event *evt)
 			break;
 		case 'c':/*!< Enter (continue) key */
 			/* Enter selected menu entry */
+			display->setErrorString(numberInput.c_str());
 			break;
 		case '1' ... '9':
+			numberInput.push_back(*(char *)evt->getArguments());
+			if (numberInput.length() > 4) // pop data from front of string to reduce to 4 character string
+				numberInput.erase(0, numberInput.length() - 4);
+			break;
 		default:
 			break;
 		}

@@ -163,14 +163,14 @@ std::vector<std::string> CDDWebApi::getSupportedKnowledgeLevels()
 	return supportedKLDescr;
 }
 
-/*! CDDWebApi::login(char pin[4])
+/*! CDDWebApi::login(const char pin)
  * @author Thomas Deacon
  * @brief Sends login request to CDD and processes return data
  * 
- * @param[in] pin is a 4 digit pin used to authenticate the RPU
+ * @param[in] pin is the pin used to authenticate the RPU
  * @returns 0 upon success, -1 upon CuRL fault and -2 for an invalid response
  */
-int CDDWebApi::login(char newPin[4])
+int CDDWebApi::login(const char *newPin)
 {
 	// Check initialisation was successfull
 	if (!cdd) {

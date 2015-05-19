@@ -22,7 +22,7 @@ public:
 	~CDDWebApi();
 
 	// For communicating with CDD
-	int login(char pin[4]);
+	int login(const char *pin);
 	void logout();
 	int requestAudioStream(char trackID[4]);
 

@@ -18,7 +18,7 @@
 #include <AudioPlayer.h>
 #include <Display.h>
 #include <Menu.hpp>
-
+#include <CDDWebApi.h>
 
 /*!
  * @class RPU
@@ -79,6 +79,8 @@ private:
 	pthread_t audioThread, /*!< pthread handle the Audio thread */
 		  ioThread; /*!< pthread handles for IO thread */
 	Menu *mainMenu;
+	std::string numberInput;
+	CDDWebApi *cddapi;
 
 	void loginPrompt(Event *evt);
 	void displayMenu(Event *evt);

@@ -9,7 +9,7 @@ DEBUG?=-g
 CC:=$(CROSS_COMPILE)gcc
 CXX:=$(CROSS_COMPILE)g++
 LD:=$(CXX)
-CFLAGS?=`pkg-config libusb-1.0 --cflags` $(DEBUG)
+CFLAGS?=`pkg-config libusb-1.0 --cflags` `pkg-config libvlc-dev --cflags` $(DEBUG)
 CXXFLAGS?=`pkg-config gstreamer-1.0 --cflags` `pkg-config libusb-1.0 --cflags` `pkg-config ncurses --cflags` -I./includes $(DEBUG)
 LDFLAGS?=-lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lusb-1.0 -lpthread -lcurl -lncurses -lvlc
 
