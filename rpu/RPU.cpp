@@ -40,9 +40,9 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 	}
 	delete addresses;
 	player = new VLCAudioPlayer(ipaddr);
+	cddapi = new CDDWebApi(ipaddr);
 	delete ipaddr;
 
-	cddapi = new CDDWebApi("10.0.0.1");
 
 	mainMenu = new Menu();
 	mainMenu->addMenuItem("Enter Exhibit");
@@ -206,7 +206,7 @@ void RPU::loginPrompt(Event *evt)
 				display->setMenuString(mainMenu->getCurrentMenuItem());
 				display->setErrorString(NULL);
 			} else {
-				display->setErrorString("Invalid Pin");
+				display->setErrorString(cddapi->getLastSentMessage().c_str());
 			}
 			break;
 		case '1' ... '9':
@@ -269,6 +269,7 @@ void RPU::displayMenu(Event *evt)
 		case 'c':/*!< Enter (continue) key */
 			/* Enter selected menu entry */
 			display->setErrorString(numberInput.c_str());
+			cddapi->requestAudioStream(numberInput.c_str());
 			break;
 		case '1' ... '9':
 			numberInput.push_back(*(char *)evt->getArguments());

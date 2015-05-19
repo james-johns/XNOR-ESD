@@ -18,6 +18,7 @@ CDDWebApi::CDDWebApi(const char *cddIPAddr)
 	// IP Address must include null terminator
 	ipaddr = (char*)malloc(sizeof(char) * (ipLength + 1)); 
 	strncpy(ipaddr, cddIPAddr, strlen(cddIPAddr));
+	ipaddr[ipLength] = '\0';
 	cdd = curl_easy_init();
 }
 
@@ -186,7 +187,7 @@ int CDDWebApi::login(const char *newPin)
 	// Construct a string to request a login
 	toSend = "http://";
 	toSend += ipaddr;
-	toSend += ":80/api.cgi?&action=1&pin=";
+	toSend += ":80/~james/esd/api.cgi?&action=1&pin=";
 	toSend += newPin;
 	lastSentMessage.clear();
 	lastSentMessage = toSend;
@@ -237,7 +238,7 @@ void CDDWebApi::logout()
 	// Construct a string to request a login
 	toSend = "http://";
 	toSend += ipaddr;
-	toSend += ":80/api.cgi?&action=0&pin=";
+	toSend += ":80/~james/esd/api.cgi?&action=0&pin=";
 	toSend += pin;
 	lastSentMessage.clear();
 	lastSentMessage = toSend;
@@ -255,7 +256,7 @@ void CDDWebApi::logout()
  * @param trackID Is the 4 digit track identifier for the audio playback.
  * @returns 0 regardless of error (will fix...hopefully).
  */
-int CDDWebApi::requestAudioStream(char trackID[4])
+int CDDWebApi::requestAudioStream(const char *trackID)
 {
 	// Check initialisation was successfull
 	if (!cdd)
@@ -269,7 +270,7 @@ int CDDWebApi::requestAudioStream(char trackID[4])
 	// Construct a string to request a track
 	toSend = "http://";
 	toSend += ipaddr;
-	toSend += ":80/api.cgi?&token=";
+	toSend += ":80/~james/esd/api.cgi?&token=";
 	toSend += token;
 	toSend += "&trackid=";
 	toSend += trackID;

@@ -13,13 +13,16 @@ CFLAGS?=`pkg-config libusb-1.0 --cflags` `pkg-config libvlc-dev --cflags` $(DEBU
 CXXFLAGS?=`pkg-config gstreamer-1.0 --cflags` `pkg-config libusb-1.0 --cflags` `pkg-config ncurses --cflags` -I./includes $(DEBUG)
 LDFLAGS?=-lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lusb-1.0 -lpthread -lcurl -lncurses -lvlc
 
-.PHONY: all clean rpuclient
+.PHONY: all clean rpuclient TAGS
 
 all: rpuclient
 
 clean:
 	rm $(obj-y)
 	rm rpuclient
+
+TAGS:
+	find . -name '*.[h,cpp]'| etags -
 
 rpuclient: $(obj-y)
 	$(LD) -o $@ $(obj-y) $(LDFLAGS)

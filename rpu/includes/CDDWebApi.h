@@ -24,7 +24,7 @@ public:
 	// For communicating with CDD
 	int login(const char *pin);
 	void logout();
-	int requestAudioStream(char trackID[4]);
+	int requestAudioStream(const char *trackID);
 
 	// Changing parameters
         void changeLanguage(int language);
