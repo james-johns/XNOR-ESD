@@ -187,7 +187,7 @@ int CDDWebApi::login(const char *newPin)
 	// Construct a string to request a login
 	toSend = "http://";
 	toSend += ipaddr;
-	toSend += ":80/~james/esd/api.cgi?&action=1&pin=";
+	toSend += ":80/api.cgi?&action=1&pin=";
 	toSend += newPin;
 	lastSentMessage.clear();
 	lastSentMessage = toSend;
@@ -238,7 +238,7 @@ void CDDWebApi::logout()
 	// Construct a string to request a login
 	toSend = "http://";
 	toSend += ipaddr;
-	toSend += ":80/~james/esd/api.cgi?&action=0&pin=";
+	toSend += ":80/api.cgi?&action=0&pin=";
 	toSend += pin;
 	lastSentMessage.clear();
 	lastSentMessage = toSend;
@@ -270,7 +270,7 @@ int CDDWebApi::requestAudioStream(const char *trackID)
 	// Construct a string to request a track
 	toSend = "http://";
 	toSend += ipaddr;
-	toSend += ":80/~james/esd/api.cgi?&token=";
+	toSend += ":80/api.cgi?&token=";
 	toSend += token;
 	toSend += "&trackid=";
 	toSend += trackID;
