@@ -56,7 +56,7 @@ private:
 	char *ipaddr;
 	char lastTrackID[4];
 	char pin[5];
-	std::string languageCode, knowledgeCode;
+	int languageCode, knowledgeCode;
 };
 
 
