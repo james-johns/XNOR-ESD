@@ -20,8 +20,9 @@ VLCAudioPlayer::VLCAudioPlayer(const char *ipaddr) : AudioPlayer(ipaddr)
   vlc = libvlc_new(0, NULL); //Create VLC instance
 
   std::string url = "rtsp://";
-  url += (ipaddr != NULL) ? ipaddr : "127.0.0.1";
-  url += ":5540/test";
+  url += "127.0.0.1";
+  url += ":5540/";
+  url += ipaddr;
   
   vlc_m = libvlc_media_new_location(vlc, url.c_str());
   vlc_mp = libvlc_media_player_new_from_media(vlc_m);
@@ -94,7 +95,7 @@ void VLCAudioPlayer::play()
  */
 void VLCAudioPlayer::playpause()
 {
-  pause(); //VLC function already toggles pause
+  libvlc_media_player_pause(vlc_mp); //VLC function already toggles pause
 }
 
 /*! VLCAudioPlayer::isPlaying()
@@ -104,12 +105,12 @@ void VLCAudioPlayer::playpause()
  */
 bool VLCAudioPlayer::isPlaying()
 {
-  return libvlc_media_player_is_playing(vlc_mp) == 1;
+  return libvlc_media_player_is_playing(vlc_mp);
 }
 
 /*! VLCAudioPlayer::rewind()
  * @author Rob Shepherd
- * @brief Rewind the media palyer playback
+ * @brief Rewind the media player playback
  *
  * @details rewind playback by 5 seconds, or to the beginning of the track; 
  */

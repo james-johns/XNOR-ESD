@@ -39,6 +39,7 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 			delete *it;
 	}
 	delete addresses;
+	printf("%s\n", ipaddr);
 	player = new VLCAudioPlayer(ipaddr);
 	cddapi = new CDDWebApi(ipaddr);
 	delete ipaddr;
@@ -270,6 +271,7 @@ void RPU::displayMenu(Event *evt)
 			/* Enter selected menu entry */
 			display->setErrorString(numberInput.c_str());
 			cddapi->requestAudioStream(numberInput.c_str());
+			player->play();
 			break;
 		case '1' ... '9':
 			numberInput.push_back(*(char *)evt->getArguments());
