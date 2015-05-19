@@ -33,11 +33,11 @@ td {
   <tr>
   	<!--Menu Options goes here-->
     <td align="center"><input type="image" src="img/reguserbutton.png" value="registerUser" title="Register User" onclick="window.location.href='adduser.php'" /></td>
-    <td align="center"><input type="image" src="img/searchuserbutton.png" value="searchUser" title="Search User, Complete Payment" onclick="window.location.href='searchuser.php'" /> </td>
-    <td align="center"><input type="image" src="img/deluserbutton.png" value="deleteUser" title="Delete User" onclick="window.location.href='deleteuser.php'" /></td>
+    <td align="center"><input type="image" src="img/searchuserbutton.png" value="searchUser" title="Search User, Complete Payment" onclick="window.location.href='cp-searchuser.php'" /> </td>
+    <td align="center"><input type="image" src="img/deluserbutton.png" value="deleteUser" title="Delete User" onclick="window.location.href='du-searchuser.php'" /></td>
     </tr>
   <tr>
-    <td align="center"><input type="image" src="img/edituserbutton.png" value="logoutRPU" title="Logout RPU" onclick="window.location.href='saveedituser.php'" /></td>
+    <td align="center"><input type="image" src="img/edituserbutton.png" value="logoutRPU" title="Logout RPU" onclick="window.location.href='eu-searchuser.php'" /></td>
     <td align="center"><input type="image" src="img/logoutrpubutton.png" value="logoutRPU" title="Logout RPU" onclick="window.location.href='logoutrpu.php'" /></td>
     <td align="center"><input type="image" src="img/startbroadcastbutton.png" value="startBroadcast" title="Start Broadcast" onclick="window.location.href='broadcast.php'" /></td>
     </tr>

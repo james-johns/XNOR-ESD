@@ -9,11 +9,11 @@
 <body>
 
 <?php
-$clientID = isset($_GET['clientID']) ? $_GET['clientID'] : '';
+$clientID = isset($_POST['clientID']) ? $_POST['clientID'] : '';
 //$clientID = $_POST["clientID"];
-echo $clientID;
+//echo $clientID;
 
-
+//print_r($_POST);
 //if (isset($_POST['submit'])){
 	//$name = htmlentities($_POST['name'], ENT_QUOTES, 'UTF-8');	
 	//$fullname = implode('+', $_POST['fullname']);
@@ -24,10 +24,13 @@ echo $clientID;
 
 
 
-<form id="completepaymentform" action="server.php">
+<form id="completepaymentform" action="192.168.1.3">
 <fieldset>
 <legend>Add Payment:</legend>
+
 <input type="hidden" name="clientID" value="<?php echo $clientID;?>">
+
+
 <table width="200" border="1">
     <tr>
     	<td><input type="text" size="32" name="paytransid" placeholder="Transaction Id" required></td>
@@ -38,9 +41,9 @@ echo $clientID;
 
         <input type="radio" name="paytype" value="cash" checked>Cash
         <br>
-        <input type="radio" name="paytype" value="debitcard">Debit Card
+        <input type="radio" name="paytype" value="Visa">Visa
 		<br>
-		<input type="radio" name="paytype" value="creditcard">Credit Card
+		<input type="radio" name="paytype" value="Master">Master 
 		<br>       
         </td>
     </tr>

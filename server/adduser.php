@@ -22,7 +22,7 @@
 
 
 
-<form id="adduserform" action="server.php">
+<form id="adduserform" action="192.168.1.3">
 <fieldset>
 <legend>Add User:</legend>
 <table width="200" border="1">
@@ -334,8 +334,6 @@ $("#adduserform").submit(function(event) {
 	cty = $form.find( "input[name='city']" ).val(),
 	pc = $form.find( "input[name='postcode']" ).val(),
 	cntry = $form.find( "input[name='country']" ).val(),
-	lang = $form.find( "input[name='language']" ).val(),
-	kl = $form.find( "input[name='knowledgelvl']" ).val(),
 	mb = $form.find( "input[name='mobilenum']" ).val(),
     url = $form.attr( "action" );
 
@@ -353,14 +351,14 @@ var selectedcountry = e.options[e.selectedIndex].text;
 		var repadl2 = adl2.split(' ').join('-'); //check if emptyu
 	}
 	else{
-		var repadl2 = "NULL";	
+		var repadl2 = "?";	
 	}
 	
 	if (repadl3){
 		var repadl3 = adl3.split(' ').join('-'); // check if empty // town		
 	}
 	else{
-		var repadl3 = "NULL";	
+		var repadl3 = "?";	
 	}
 	
 	//alert(cntry);
@@ -391,7 +389,7 @@ var selectedcountry = e.options[e.selectedIndex].text;
   posting.done(function( data ) {
 	 // alert(data);
 	  
-	  if (data){
+	  if (data != '!'){
 		  //alert(data);
 		  	var url = 'au-confirmation.php';
 			var form = $('<form action="' + url + '" method="post">' +
