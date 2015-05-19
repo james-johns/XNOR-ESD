@@ -4,11 +4,11 @@ use DBI;
 use Switch;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Time::Piece;
-
+use Net::Telnet ();
 
 ### Environment variable definitions
 $logfile='./gstreamer.log';
-$audio_base_path = "/home/james/public_html/esd/audio/"; # should be reconfigured to a better location, base path for audio file storage
+$audio_base_path = "/home/rob/audio/"; # should be reconfigured to a better location, base path for audio file storage
 my $q = CGI->new();
 
 $HTTP_TYPE = 'text/plain';
@@ -309,6 +309,7 @@ sub streamTrack
   my $knowledge = $q->param('knowledge');
 
   my $trackpath = getTrackPath($trackid, $language, $knowledge);
+  debugPrint "Track path: $trackpath\n";
   stream_audio_track($trackpath, $remote_addr);
 }
 
@@ -333,15 +334,16 @@ sub stream_audio_track
 {
     my $file      = @_[0];
     my $target_ip = @_[1];
-    my $pid = 0;
     my $id = "test";
 
-    my $tel = new Net::Telnet(Port => "4212");
-    $tel->open("127.0.0.1");
-    $tel->waitfor('/password: ?$/i');
-    $tel->print("videolan");
-
     if (-e $file) {
+	my $tel = new Net::Telnet(Port => "4212");
+	$tel->open("127.0.0.1");
+	$tel->waitfor('/password: ?$/i');
+	$tel->print("videolan");
+	
+	$tel->cmd("control $id stop");
+	$tel->cmd("del $id"); 
 	$tel->cmd("new $id vod enabled");
 	$tel->cmd("setup $id input $file");
 	
