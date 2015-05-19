@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	LCDDisplay *display = new LCDDisplay();
 	
 
-	//change i to = argv define i outside of the forloop
+	
 
 for (;testString[i] != NULL;i++){
   if (strlen(testString[i]) > 1){
