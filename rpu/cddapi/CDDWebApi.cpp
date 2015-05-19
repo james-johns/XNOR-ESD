@@ -220,6 +220,8 @@ int CDDWebApi::login(const char *newPin)
 	// Response is ok, filter
 	filterResponse(response);
 	strncpy (pin, newPin, 4);
+	languageCode="1";
+	knowledgeCode="1";
 	return 0;    
 	
 }
@@ -247,6 +249,8 @@ void CDDWebApi::logout()
 	curl_easy_setopt (cdd, CURLOPT_URL, toSend.c_str());
 	curl_easy_perform(cdd);
 	strncpy (pin, "    ", 4);
+	languageCode="1";
+	knowledgeCode="1";
 
 }
 
