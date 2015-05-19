@@ -227,7 +227,7 @@ sub addTrack
     my @args = $q->param;
   debugPrint "@args  --> addTrack <br>\n";
   my $args = shift;
-  my $file = $q->param('file');
+  my $file = $q->param('filename');
   my $trackid = $q->param('trackid');
   my $language = $q->param('language');
   my $knowledge = $q->param('knowledge');

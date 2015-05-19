@@ -22,7 +22,7 @@
 
 
 
-<form id="addtrackform" action="server.php">
+<form id="addtrackform" action="api.cgi">
 <fieldset>
 <legend>Add Track:</legend>
 <table width="200" border="1">
