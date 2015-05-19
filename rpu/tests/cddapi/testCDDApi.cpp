@@ -17,13 +17,16 @@ int main (void)
 	while (loop < kl.size()) {
 		std::cout  << kl[loop] << "\n";
 		loop++;
-		std::vector<std::string> lang = test->getSupportedLanguages();
-		loop=0;
-		std::cout << "\nSupported Languages:\n";
-		while (loop < lang.size()){
-			std::cout << lang[loop] << "\n";
-			loop++;
-		}
+
+	}
+
+	std::cout << "\nSupported Languages:\n";
+
+	std::vector<std::string> lang = test->getSupportedLanguages();
+	loop=0;
+	while (loop < lang.size()){
+		std::cout << lang[loop] << "\n";
+		loop++;
 	}
 
 	std::cout << "\n\nPlayback Request:";
