@@ -1,3 +1,7 @@
+/*!
+ * @file CDDWebApi.cpp
+ * @author Thomas Deacon
+ */
 #include <CDDWebApi.h>
 #include <stdlib.h>
 
@@ -31,14 +35,14 @@ CDDWebApi::~CDDWebApi()
 /*! size_t writeToString
  * @author Thomas Deacon
  * @brief Function used to take libcurl output and store in a string
- * Original function written by Joachim Isaksson
- * Available at stackoverflow.com
+ *! Original function written by Joachim Isaksson
+ *! Available at stackoverflow.com
  *
- * @param void ptr        Location of input
- * @param size_t size     Size of input
- * @param size_t count    Occurances of input
- * @param void stream     Location of output
- * @return                Size of input string
+ * @param[in] void ptr        Location of input
+ * @param[in] size_t size     Size of input
+ * @param[in] size_t count    Occurances of input
+ * @param[out] void stream    Location of output
+ * @return                    Size of input string
  */
 size_t writeToString (void *ptr, size_t size, size_t count, void *stream)
 {
@@ -77,57 +81,83 @@ void CDDWebApi::filterResponse (std::string response)
 	
 	// Loop until end of string
 	while (next < end) {
-
+		//Find next knowledge level identifier
 		next = knowledgelvl.substr(identifier, end).find (".");
 		supportedKLID.push_back(
 			knowledgelvl.substr (identifier, next));
 		identifier += next +1;
-
+		
+		// Find next knowledge level description
 		next = knowledgelvl.substr(identifier, end).find ("-");
 		supportedKLDescr.push_back 
 			(knowledgelvl.substr (identifier, next));
 		identifier += next +1;
 	}
-
+	// Reset variables for tokenising languages
 	identifier=0;
 	next=0;
 	supportedLangID.clear();
 	supportedLangDescr.clear();
 	end = languages.length();
+	
+	// Loop until end of string
 	while (next < end) {
+		// Find next language ID
 		next = languages.substr(identifier, end).find (".");
 		supportedLangID.push_back (languages.substr (identifier, next));
 		identifier += next +1;
 
+		// Find next language description
 		next = languages.substr(identifier, end).find ("-");
 		supportedLangDescr.push_back 
 			(languages.substr (identifier, next));
 		identifier += next +1;
 	}
-	
-
 }
 
+/*! std::string CDDWebApi::getToken()
+ * @author Thomas Deacon
+ * @returns A string containing the current token supplied by the CDD at login
+ */
 std::string CDDWebApi::getToken()
 {
 	return token;
 }
 
+/*! std::string CDDWebApi::getLastSentMessage()
+ * @author Thomas Deacon
+ * @brief A debugging tool to verify the last message sent
+ * @returns A string containing the last transmitted message
+ */
 std::string CDDWebApi::getLastSentMessage()
 {
 	return lastSentMessage;
 }
 
+/*! std::string CDDWebApi::getErr()
+ * @author Thomas Deacon
+ * @returns A string containing the last recorded error (if present)
+ */
 std::string CDDWebApi::getErr()
 {
 	return error;
 }
 
+/*! std::vector<std::string> CDDWebApi::getSupportedLanguages()
+ * @author Thomas Deacon
+ * @returns A vector of strings, each element is a description of a supported
+ *! language.
+ */
 std::vector<std::string> CDDWebApi::getSupportedLanguages()
 {
 	return supportedLangDescr;
 }
 
+/*! std::vector<std::string> CDDWebApi::getSupportedKnowledgeLevels()
+ * @author Thomas Deacon
+ * @returns A vector of strings, each element is a description of a supported
+ *! knowledge level
+ */
 std::vector<std::string> CDDWebApi::getSupportedKnowledgeLevels()
 {
 	return supportedKLDescr;
@@ -138,6 +168,7 @@ std::vector<std::string> CDDWebApi::getSupportedKnowledgeLevels()
  * @brief Sends login request to CDD and processes return data
  * 
  * @param[in] pin is a 4 digit pin used to authenticate the RPU
+ * @returns 0 upon success, -1 upon CuRL fault and -2 for an invalid response
  */
 int CDDWebApi::login(char newPin[4])
 {
@@ -168,6 +199,7 @@ int CDDWebApi::login(char newPin[4])
 		return -1;
 	}
 
+	// Check if response indicates an error
 	if (response.compare ("could not find a record <br>")==0){
 		error="INVALID PIN";
 		return -2;
@@ -180,16 +212,20 @@ int CDDWebApi::login(char newPin[4])
 		error="INVALID REQUEST";
 		return -2;
 	}
+	else if (response.find(":")==std::string::npos) {
+		error="UNDEFINED RESPONSE";
+		return -2;
+	}
+	// Response is ok, filter
 	filterResponse(response);
-
 	strncpy (pin, newPin, 4);
 	return 0;    
 	
 }
 
-/*! CDDWebApi::logout()
+/*! void CDDWebApi::logout()
  * @author Thomas Deacon
- * @brief Clears currently stored token
+ * @brief Used to logout the RPU, and clears all associated variables used
  */
 void CDDWebApi::logout()
 {
@@ -209,10 +245,16 @@ void CDDWebApi::logout()
 	// Send login request
 	curl_easy_setopt (cdd, CURLOPT_URL, toSend.c_str());
 	curl_easy_perform(cdd);
-
+	strncpy (pin, "    ", 4);
 
 }
 
+/*! int CDDWebApi::requestAudioStream (char trackID[4])
+ * @author Thomas Deacon
+ * @brief This constructs and sends a request for an audio track to be played
+ * @param trackID Is the 4 digit track identifier for the audio playback.
+ * @returns 0 regardless of error (will fix...hopefully).
+ */
 int CDDWebApi::requestAudioStream(char trackID[4])
 {
 	// Check initialisation was successfull
@@ -241,17 +283,30 @@ int CDDWebApi::requestAudioStream(char trackID[4])
 	curl_easy_perform(cdd);
 	lastSentMessage.clear();
 	lastSentMessage = toSend;
-
+	// ERROR CHECKING GOES HERE!!
 }
-int CDDWebApi::changeLanguage(int language)
+
+/*! void CDDWebApi::changeLanguage (int language)
+ * @author Thomas Deacon
+ * @brief Changes the selected language based on the value passed to it. Value
+ *! should represent a position from CDDWebApi::getSupportedLanguages() vector.
+ * @param[in] language is the position of the vector
+ */
+void CDDWebApi::changeLanguage(int language)
 {
 	languageCode = supportedLangID[language];
-	return 0;
 }
-int CDDWebApi::changeKnowledgeLevel(int knowledge)
+
+/*! void CDDWebApi::changeknowledgeLevel (int knowledge)
+ * @author Thomas Deacon
+ * @brief Changes the selected knowledge level based on the value passed to it.
+ *! Value should represent a position from
+ *! CDDWebApi::getSupportedKnowledgeLevels vector.
+ * @param[in] knowledge is the position of the vector
+ */
+void CDDWebApi::changeKnowledgeLevel(int knowledge)
 {
 	knowledgeCode = supportedKLID[knowledge];
-	return 0;
 }
 
 

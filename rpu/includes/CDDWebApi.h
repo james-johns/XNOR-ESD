@@ -1,5 +1,7 @@
-
-
+/*!
+ * @file CDDWebApi.h
+ * @author Thomas Deacon
+ */
 #ifndef _CDD_WEB_API_H_
 #define _CDD_WEB_API_H_
 
@@ -7,6 +9,11 @@
 #include <string.h>
 #include <iostream>
 #include <vector>
+/*!
+ * @class CDDWebApi
+ * @author Thomas Deacon
+ * @brief Class for encapsulating RPU HTTP requests.
+ */
 
 class CDDWebApi {
 public:
@@ -20,8 +27,8 @@ public:
 	int requestAudioStream(char trackID[4]);
 
 	// Changing parameters
-        int changeLanguage(int language);
-        int changeKnowledgeLevel(int knowledge);
+        void changeLanguage(int language);
+        void changeKnowledgeLevel(int knowledge);
 
 	// Getting response data
 	std::vector<std::string> getSupportedLanguages();
