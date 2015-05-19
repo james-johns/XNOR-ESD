@@ -18,7 +18,7 @@
 #include <KeyboardDevice.h>
 #include <NCursesDisplay.h>
 #include <Menu.hpp>
-#include <GSTAudioPlayer.h>
+#include <VLCAudioPlayer.h>
 
 /*! RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
  * @author James Johns
@@ -38,7 +38,7 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 			delete *it;
 	}
 	delete addresses;
-	player = new GSTAudioPlayer(ipaddr);
+	player = new VLCAudioPlayer(ipaddr);
 	delete ipaddr;
 
 	mainMenu = new Menu();
@@ -231,12 +231,14 @@ void RPU::displayMenu(Event *evt)
 			}
 			break;
 		case 'r':
-			if (player != NULL) {
+		  if (player != NULL) {
 				player->rewind();
 			}
 			break;
 		case 'f': /*!< Fast Forward */
-			/* TODO: fast forward audio player */
+		  if (player != NULL) {
+		    player->fastForward();
+		  }
 			break;
 		case 'q':
 			state = LOGIN_PROMPT;

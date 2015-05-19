@@ -22,6 +22,7 @@ public:
 	virtual void play() = 0;
 	virtual bool isPlaying() = 0;
 	virtual void rewind() = 0;
+	virtual void fastForward() = 0;
 	virtual void playpause() = 0; // trigger play when paused, pause when paying
 
 

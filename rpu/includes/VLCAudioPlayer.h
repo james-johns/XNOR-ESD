@@ -25,6 +25,7 @@ public:
 	void play();
 	bool isPlaying();
 	void rewind();
+	void fastForward();
 	void playpause(); // trigger play when paused, pause when paying
 
 
