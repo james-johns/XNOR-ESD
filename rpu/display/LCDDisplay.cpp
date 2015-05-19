@@ -132,7 +132,7 @@ void LCDDisplay::refresh()
 	//if the region is not dirty wait until half a second has passed and make the region dirty
 	else if ((((blocks[2].lastTime.tv_sec*1000000)+blocks[2].lastTime.tv_usec)+500000) < 
 		 ((currentTime.tv_sec*1000000)+currentTime.tv_usec)) {
-			setMenuDirty(true);//Set the region flag to dirty
+		setMenuDirty(true);//Set the region flag to dirty
 	}
 
 	//if the menu region is dirt and the menuString doesnt contain NULL
@@ -173,14 +173,14 @@ void LCDDisplay::writeBlock(int block, char *inputString)
 	std::cout << "writing scroll string: " << inputData.substr(j, blocks[block].length).c_str() << std::endl;
 	
 	//if the length of the string is less than the region length:
-	/*if (inputData.length() <= blocks[block].length){
-	  //for each additional character until reaching the region length
-	  for (int i = inputData.length();i<blocks[block].length;i++)
-	  {
-	  inputData[i]=' '; // set the current character to a space
-	  writeLength = i; //debugging string
-	  }
-	  }*/
+	if (inputData.length() <= blocks[block].length){
+		//for each additional character until reaching the region length
+		for (int i = inputData.length();i<blocks[block].length;i++)
+		{
+			inputData.push_back(' ') ; // set the current character to a space
+			writeLength = i; //debugging string
+		}
+	}
 	std::cout << "[1] input Length  " << inputData.length() << std::endl;//debugging string
 	std::cout << "[2] block Length  " << blocks[block].length << std::endl;//debugging string
 	std::cout << "[3] write Length  " << writeLength << std::endl;//debugging string
