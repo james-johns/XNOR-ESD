@@ -292,7 +292,7 @@ sub storeFile {
 
 #    $file=~m/^.*(\\|\/)(.*)/; # strip the remote path and keep the filename
 #    my $name = $2;
-    open(LOCAL, ">$filepath") or die $!;
+    open(LOCAL, ">$filepath") or print $!;
     while(<$file>) {
         print LOCAL $_;
     }
