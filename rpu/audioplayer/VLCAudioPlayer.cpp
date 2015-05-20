@@ -162,13 +162,3 @@ void VLCAudioPlayer::rewind()
     
   libvlc_media_player_set_time(vlc_str, targetTime);
 }
-
-void VLCAudioPlayer::fastForward()
-{
-  libvlc_time_t currentTime = libvlc_media_player_get_time(vlc_str);
-  libvlc_time_t targetTime;
-
-  targetTime = currentTime + 5000;
-
-  libvlc_media_player_set_time(vlc_str, targetTime);
-}

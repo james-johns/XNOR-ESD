@@ -1,6 +1,6 @@
 
 
-obj-y:=main.o Event.o RPU.o keypad/KeypadDevice.o audioplayer/AudioPlayer.o cddapi/CDDWebApi.o keypad/KeyboardDevice.o display/LCDDisplay.o display/Display.o display/NCursesDisplay.o Menu.o audioplayer/VLCAudioPlayer.o
+obj-y:=main.o Event.o RPU.o keypad/KeypadDevice.o audioplayer/AudioPlayer.o cddapi/CDDWebApi.o keypad/KeyboardDevice.o display/LCDDisplay.o display/Display.o display/NCursesDisplay.o Menu.o audioplayer/VLCAudioPlayer.o audioplayer/GSTAudioPlayer.o
 
 CROSS_COMPILE?=
 DEBUG?=-g
@@ -9,9 +9,9 @@ DEBUG?=-g
 CC:=$(CROSS_COMPILE)gcc
 CXX:=$(CROSS_COMPILE)g++
 LD:=$(CXX)
-CFLAGS?=`pkg-config libusb-1.0 --cflags` `pkg-config libvlc-dev --cflags` $(DEBUG)
-CXXFLAGS?=`pkg-config libusb-1.0 --cflags` `pkg-config ncurses --cflags` -I./includes $(DEBUG)
-LDFLAGS?=-lusb-1.0 -lpthread -lcurl -lncurses -lvlc
+CFLAGS?=`pkg-config libusb-1.0 --cflags` `pkg-config libvlc-dev --cflags` 
+CXXFLAGS?=`pkg-config libusb-1.0 --cflags` `pkg-config ncurses --cflags` -I./includes $(DEBUG) `pkg-config gstreamer-1.0 --cflags`
+LDFLAGS?=-lusb-1.0 -lpthread -lcurl -lncurses -lvlc `pkg-config gstreamer-1.0 --libs`
 
 .PHONY: all clean rpuclient TAGS
 

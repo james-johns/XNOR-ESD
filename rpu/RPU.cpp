@@ -20,6 +20,7 @@
 #include <Menu.hpp>
 #include <VLCAudioPlayer.h>
 #include <CDDWebApi.h>
+#include <GSTAudioPlayer.h>
 
 /*! RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
  * @author James Johns
@@ -39,9 +40,8 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 			delete *it;
 	}
 	delete addresses;
-	printf("%s\n", ipaddr);
-	player = new VLCAudioPlayer(ipaddr);
 	cddapi = new CDDWebApi("10.0.0.2");
+	player = new GSTAudioPlayer(ipaddr);
 	delete ipaddr;
 
 
@@ -104,7 +104,7 @@ void RPU::tick()
 {
 	//Checks for incoming broadcast. Mutes regular streaming
 	//Returns bool; true if broadcasting, false if not 
-	player->listen(); 
+	//player->listen(); 
 
 	Event *evt = getEvent();
 	do {
@@ -269,14 +269,12 @@ void RPU::displayMenu(Event *evt)
 			}
 			break;
 		case 'r':
-		  if (player != NULL) {
+			if (player != NULL) {
 				player->rewind();
 			}
 			break;
 		case 'f': /*!< Fast Forward */
-		  if (player != NULL) {
-		    player->fastForward();
-		  }
+			/* TODO: fast forward audio player */
 			break;
 		case 'q':
 			state = LOGIN_PROMPT;
@@ -360,7 +358,7 @@ void RPU::selectLanguage(Event *evt)
 			break;
 		case 'f': /*!< Fast Forward */
 		  if (player != NULL) {
-		    player->fastForward();
+			  //		    player->fastForward();
 		  }
 			break;
 		case 'q':
@@ -439,7 +437,7 @@ void RPU::selectKnowledge(Event *evt)
 			break;
 		case 'f':/*!< Fast Forward */
 		  if(player != NULL) {
-		    player->fastForward();
+			  // player->fastForward();
 		  }
 			break;
 		case 'q':
@@ -497,7 +495,7 @@ void RPU::requestStream(Event *evt)
 			break;
 		case 'f':/*!< Fast Forward */
 		  if (player != NULL) {
-		    player->fastForward();
+			  //player->fastForward();
 		  }
 			break;
 		case 'q': /* cancel key - return to menu */
