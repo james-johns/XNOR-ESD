@@ -13,9 +13,9 @@ int main()
 
   while(1) 
     {
-      printf("Stream: %d\n", player->isPlaying());
-      printf("Broadcast: %d\n", player->listen());
-      sleep(1);
+      //player->isPlaying());
+      player->listen();
+      usleep(100);
     }
 
   return 0;

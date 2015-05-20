@@ -39,6 +39,8 @@ private:
 	libvlc_media_player_t *vlc_bc;
 	libvlc_media_t *vlc_m;
 
+	unsigned int counter; //Used for timing in listen()
+
 	std::string url;
 };
 

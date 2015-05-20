@@ -20,6 +20,8 @@ VLCAudioPlayer::VLCAudioPlayer(const char *ipaddr) : AudioPlayer(ipaddr)
   const char *vlc_args[] = {"-q"};
   vlc = libvlc_new(1, vlc_args); //Create VLC instance
 
+  counter = 0;
+
   url = "rtsp://";
   url += "127.0.0.1";
   url += ":5540/";
@@ -27,11 +29,9 @@ VLCAudioPlayer::VLCAudioPlayer(const char *ipaddr) : AudioPlayer(ipaddr)
   
   vlc_m = libvlc_media_new_location(vlc, (url+"broadcast").c_str());
   vlc_bc = libvlc_media_player_new_from_media(vlc_m);  
-  libvlc_media_release(vlc_m);
 
   vlc_m = libvlc_media_new_location(vlc, (url+ipaddr).c_str());
   vlc_str = libvlc_media_player_new_from_media(vlc_m);
-  libvlc_media_release(vlc_m);
 }
 
 /*! VLCAudioPlayer::VLCAudioPlayer(const char *ipaddr)
@@ -46,6 +46,7 @@ VLCAudioPlayer::~VLCAudioPlayer()
   libvlc_media_player_release(vlc_str);
   libvlc_media_player_stop(vlc_bc);
   libvlc_media_player_release(vlc_bc);
+  libvlc_media_release(vlc_m);
   libvlc_release(vlc);	
 }
 
@@ -62,16 +63,25 @@ void VLCAudioPlayer::run()
 
 bool VLCAudioPlayer::listen()
 {
-  if(libvlc_media_player_is_playing(vlc_bc)) {
-    pause(); //Stop regular streaming
-    return true;
+  if(counter == 500) {
+    if(/*libvlc_media_player_will_play(vlc_bc) &&*/ libvlc_media_player_is_playing(vlc_bc)) {
+      pause(); //Stop regular streaming
+      libvlc_media_player_play(vlc_bc);
+      return true;
+    }
+    else if(!libvlc_media_player_will_play(vlc_bc)) { //Try to connect
+      play(); //Continue regular streaming
+      libvlc_media_player_release(vlc_bc);
+      vlc_m = libvlc_media_new_location(vlc, (url+"broadcast").c_str());
+      vlc_bc = libvlc_media_player_new_from_media(vlc_m);  
+      libvlc_media_release(vlc_m);
+      libvlc_media_player_play(vlc_bc);
+      return false;
+    }
+    counter = 0;
   }
-  else { //Try to connect
-    play(); //Continue regular streaming
-    vlc_m = libvlc_media_new_location(vlc, (url+"broadcast").c_str());
-    vlc_bc = libvlc_media_player_new_from_media(vlc_m);  
-    libvlc_media_release(vlc_m);
-    libvlc_media_player_play(vlc_bc);
+  else {
+    counter++;
   }
 }
 

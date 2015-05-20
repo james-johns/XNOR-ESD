@@ -16,6 +16,9 @@ elsif($pid) {
     $t->waitfor('/password: ?$/i');
     $t->print("videolan");
     
-    $t->cmd("new test vod enabled");
-    $t->cmd("setup test input /home/rob/a.ogg");
+    $t->cmd("new 127.0.0.1 vod enabled");
+    $t->cmd("setup 127.0.0.1 input /home/rob/cat.mp3");
+
+    $t->cmd("new broadcast vod enabled");
+    $t->cmd("setup broadcast input /home/rob/a.ogg");
 }
