@@ -17,7 +17,8 @@
  */
 VLCAudioPlayer::VLCAudioPlayer(const char *ipaddr) : AudioPlayer(ipaddr)
 {
-  vlc = libvlc_new(0, NULL); //Create VLC instance
+  const char *vlc_args[] = {"-q"};
+  vlc = libvlc_new(1, vlc_args); //Create VLC instance
 
   url = "rtsp://";
   url += "127.0.0.1";

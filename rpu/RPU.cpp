@@ -102,6 +102,10 @@ RPU::~RPU()
  */
 void RPU::tick()
 {
+  //Checks for incoming broadcast. Mutes regular streaming
+  //Returns bool; true if broadcasting, false if not 
+  player->listen(); 
+
 	Event *evt;
 	while ((evt = getEvent()) != NULL) {
 		switch (evt->getType()) {
