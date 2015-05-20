@@ -1,0 +1,163 @@
+-- MySQL dump 10.13  Distrib 5.5.43, for debian-linux-gnu (x86_64)
+--
+-- Host: localhost    Database: ESD
+-- ------------------------------------------------------
+-- Server version	5.5.43-0ubuntu0.14.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `Client`
+--
+
+DROP TABLE IF EXISTS `Client`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Client` (
+  `idClient` int(11) NOT NULL AUTO_INCREMENT,
+  `forename` varchar(50) DEFAULT NULL,
+  `surname` varchar(50) DEFAULT NULL,
+  `mobilePhone` varchar(20) DEFAULT NULL,
+  `address` varchar(300) DEFAULT NULL,
+  PRIMARY KEY (`idClient`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Client Details';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Client`
+--
+
+LOCK TABLES `Client` WRITE;
+/*!40000 ALTER TABLE `Client` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Client` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `KnowledgeLvl`
+--
+
+DROP TABLE IF EXISTS `KnowledgeLvl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `KnowledgeLvl` (
+  `idKnowledgeLvl` int(11) NOT NULL AUTO_INCREMENT,
+  `knowledgeLvl` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`idKnowledgeLvl`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `KnowledgeLvl`
+--
+
+LOCK TABLES `KnowledgeLvl` WRITE;
+/*!40000 ALTER TABLE `KnowledgeLvl` DISABLE KEYS */;
+INSERT INTO `KnowledgeLvl` VALUES (1,'Easy'),(2,'Advanced');
+/*!40000 ALTER TABLE `KnowledgeLvl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Language`
+--
+
+DROP TABLE IF EXISTS `Language`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Language` (
+  `idLanguage` int(11) NOT NULL AUTO_INCREMENT,
+  `language` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`idLanguage`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Language`
+--
+
+LOCK TABLES `Language` WRITE;
+/*!40000 ALTER TABLE `Language` DISABLE KEYS */;
+INSERT INTO `Language` VALUES (1,'English'),(2,'French'),(3,'German'),(4,'Russian');
+/*!40000 ALTER TABLE `Language` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Session`
+--
+
+DROP TABLE IF EXISTS `Session`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Session` (
+  `idSession` int(11) NOT NULL AUTO_INCREMENT,
+  `idClient` int(11) DEFAULT NULL,
+  `idTransaction` int(11) DEFAULT NULL,
+  `RPU` varchar(4) DEFAULT NULL,
+  `timeOut` timestamp NULL DEFAULT NULL,
+  `idLanguage` int(11) DEFAULT NULL,
+  `idKnowledegeLvl` int(11) DEFAULT NULL,
+  `timeIn` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idSession`),
+  KEY `fk_Session_Client_idx` (`idClient`),
+  KEY `fk_Session_Transaction_idx` (`idTransaction`),
+  KEY `fk_Session_Language_idx` (`idLanguage`),
+  KEY `fk_Session_KnowledgeLvl_idx` (`idKnowledegeLvl`),
+  CONSTRAINT `fk_Session_Client` FOREIGN KEY (`idClient`) REFERENCES `Client` (`idClient`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `fk_Session_Transaction` FOREIGN KEY (`idTransaction`) REFERENCES `Transaction` (`idTransaction`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `fk_Session_Language` FOREIGN KEY (`idLanguage`) REFERENCES `Language` (`idLanguage`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `fk_Session_KnowledgeLvl` FOREIGN KEY (`idKnowledegeLvl`) REFERENCES `KnowledgeLvl` (`idKnowledgeLvl`) ON DELETE NO ACTION ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='Clients session, references: client, transaction, rpu.';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Session`
+--
+
+LOCK TABLES `Session` WRITE;
+/*!40000 ALTER TABLE `Session` DISABLE KEYS */;
+INSERT INTO `Session` VALUES (1,NULL,NULL,'1111',NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `Session` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Transaction`
+--
+
+DROP TABLE IF EXISTS `Transaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Transaction` (
+  `idTransaction` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction` varchar(20) DEFAULT NULL,
+  `paymentType` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`idTransaction`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Stores transaction details';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Transaction`
+--
+
+LOCK TABLES `Transaction` WRITE;
+/*!40000 ALTER TABLE `Transaction` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Transaction` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2015-05-20 13:31:56
