@@ -5,7 +5,7 @@
 #include <queue>
 #include <sys/select.h>
 
-#include <gst/gst.h>
+
 #include <pthread.h>
 #include <curl/curl.h>
 #include <curses.h>
@@ -16,7 +16,7 @@
 #include <RPU.h>
 
 // initialise Gstreamer library
-void initGST(int *argc, char ***argv)
+/*void initGST(int *argc, char ***argv)
 {
 	const gchar *nano_str;
 	guint major, minor, micro, nano;
@@ -31,7 +31,7 @@ void initGST(int *argc, char ***argv)
 	else
 		nano_str = "";
 
-}
+		}*/
 
 // Thread for handling audio content
 void *audioThreadEntry(void *arg)
@@ -82,7 +82,7 @@ void *ioThreadEntry(void *arg)
 int main(int argc, char **argv)
 {
 	/* Initialise required libraries */
-	initGST(&argc, &argv);
+	//initGST(&argc, &argv);
 	libusb_init(NULL);
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 
 	curl_global_cleanup();
 	libusb_exit(NULL);
-	gst_deinit();
+	//gst_deinit();
 	endwin();
 	return 0;
 }

@@ -23,7 +23,7 @@ VLCAudioPlayer::VLCAudioPlayer(const char *ipaddr) : AudioPlayer(ipaddr)
   counter = 0;
 
   url = "rtsp://";
-  url += "127.0.0.1";
+  url += "10.0.0.1";
   url += ":5540/";
   //url += ipaddr;
   

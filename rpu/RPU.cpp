@@ -41,7 +41,7 @@ RPU::RPU(void *(*audioThreadEntry)(void *), void *(*ioThreadEntry)(void *))
 	delete addresses;
 	printf("%s\n", ipaddr);
 	player = new VLCAudioPlayer(ipaddr);
-	cddapi = new CDDWebApi(ipaddr);
+	cddapi = new CDDWebApi("10.0.0.2");
 	delete ipaddr;
 
 

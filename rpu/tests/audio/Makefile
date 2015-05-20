@@ -10,8 +10,8 @@ CC:=$(CROSS_COMPILE)gcc
 CXX:=$(CROSS_COMPILE)g++
 LD:=$(CXX)
 CFLAGS?=`pkg-config libusb-1.0 --cflags` -I../../includes/ $(DEBUG)
-CXXFLAGS?=`pkg-config gstreamer-1.0 --cflags` `pkg-config libusb-1.0 --cflags` -I../../includes/ $(DEBUG)
-LDFLAGS?=-lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lusb-1.0 -lpthread -lcurl -lvlc
+CXXFLAGS?=`pkg-config libusb-1.0 --cflags` -I../../includes/ $(DEBUG)
+LDFLAGS?=-lusb-1.0 -lpthread -lcurl -lvlc
 
 .PHONY: all clean main
 

@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include <AudioPlayer.h>
-#include <gst/gst.h>
+//#include <gst/gst.h>
 
 /*! AudioPlayer::AudioPlayer(const char *ipaddr)
  * @author James Johns
