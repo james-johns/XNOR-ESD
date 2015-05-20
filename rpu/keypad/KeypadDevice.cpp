@@ -203,15 +203,18 @@ char KeypadDevice::getKeyPressed()
 {
 	char temp = keyPressed;
 	keyPressed = 0;
-	if(temp >= '0' and temp <= '9' and sevenSegData.length() != 4) {
+	if(temp >= '0' and temp <= '9') {
+	  if(sevenSegData.length() == 4) {
+	    sevenSegData.erase(0, sevenSegData.length()-4);
+	  }
 	  sevenSegData += temp;
 	}
-	else if(temp == 'c') {
+	/*else if(temp == 'c') {
 	  sevenSegData = "";
 	}
 	else if(temp == 'q') {
 	  sevenSegData = "";
-	}
+	  }*/
 	set7Seg(sevenSegData);
 	return temp;
 }
