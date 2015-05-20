@@ -10,10 +10,10 @@ USE `ESD` ;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `ESD`.`Client` (
   `idClient` INT NOT NULL AUTO_INCREMENT,
-  `forename` VARCHAR(50) NOT NULL,
-  `surname` VARCHAR(50) NOT NULL,
-  `mobilePhone` VARCHAR(20) NOT NULL,
-  `address` VARCHAR(300) NOT NULL,
+  `forename` VARCHAR(50) NULL,
+  `surname` VARCHAR(50) NULL,
+  `mobilePhone` VARCHAR(20) NULL,
+  `address` VARCHAR(300) NULL,
   PRIMARY KEY (`idClient`))
 ENGINE = InnoDB
 COMMENT = 'Client Details';
@@ -36,7 +36,7 @@ COMMENT = 'Stores transaction details';
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `ESD`.`Language` (
   `idLanguage` INT NOT NULL AUTO_INCREMENT,
-  `language` VARCHAR(20) NOT NULL,
+  `language` VARCHAR(20) NULL,
   PRIMARY KEY (`idLanguage`))
 ENGINE = InnoDB;
 
@@ -46,7 +46,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `ESD`.`KnowledgeLvl` (
   `idKnowledgeLvl` INT NOT NULL AUTO_INCREMENT,
-  `knowledgeLvl` VARCHAR(20) NOT NULL,
+  `knowledgeLvl` VARCHAR(20) NULL,
   PRIMARY KEY (`idKnowledgeLvl`))
 ENGINE = InnoDB;
 
@@ -56,13 +56,13 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `ESD`.`Session` (
   `idSession` INT NOT NULL AUTO_INCREMENT,
-  `idClient` INT NOT NULL,
+  `idClient` INT NULL,
   `idTransaction` INT NULL,
-  `RPU` VARCHAR(4) NOT NULL,
+  `RPU` VARCHAR(4) NULL,
   `timeOut` TIMESTAMP NULL,
   `idLanguage` INT NULL,
   `idKnowledegeLvl` INT NULL,
-  `timeIn` TIMESTAMP NOT NULL DEFAULT NOW(),
+  `timeIn` TIMESTAMP NULL DEFAULT NOW(),
   PRIMARY KEY (`idSession`),
   INDEX `fk_Session_Client_idx` (`idClient` ASC),
   INDEX `fk_Session_Transaction_idx` (`idTransaction` ASC),

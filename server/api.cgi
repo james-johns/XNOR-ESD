@@ -12,7 +12,7 @@ $audio_base_path = "/home/rob/audio/"; # should be reconfigured to a better loca
 my $q = CGI->new();
 
 $HTTP_TYPE = 'text/plain';
-$HTTP_RESPONSE_OK = 'HTTP/1.1 200 OK';
+$HTTP_RESPONSE_OK = '200 OK';
 
 print $q->header(-type=>$HTTP_TYPE, -status=>$HTTP_RESPONSE_OK); # required no matter what our response is
 
@@ -113,6 +113,9 @@ sub addUser
   my @fullname = split( /-/, $q->param('fullname'));
   my $address = $q->param('address');
   my $mobile = $q->param('mobilenum');
+#  my @params = $q->param();
+#  print "@params";
+
   if (!@fullname)
   {
     print "Name and Surname is required!\n";
@@ -122,7 +125,7 @@ sub addUser
     $CDSHandle = &connectCDS();
     $CDSHandle->do('INSERT INTO ESD.Client (forename, surname, mobilePhone, address) VALUES (?,?,?,?)',
       undef, $fullname[0], $fullname[1], $mobile, $address)
-        or die "SQL Error: $DBI::errstr\n";
+        or print "SQL Error: $DBI::errstr\n";
     my $id = $CDSHandle->last_insert_id(undef, undef, undef, undef);
     print "$id";
   }
@@ -185,14 +188,20 @@ END_MESSAGE
 
 sub findUser
 {
-  debugPrint "@_  --> findUser <br>";
+  my $CDSHandle;
+  my @fullname = split( /-/, $q->param('fullname'));
+  my $address = $q->param('address');
+  my $mobile = $q->param('mobilenum');
 }
 
 #################################################################
 
 sub editUser
-{
-  debugPrint "@_  --> editUser <br>";
+{ 
+  my $CDSHandle;
+  my @fullname = split( /-/, $q->param('fullname'));
+  my $address = $q->param('address');
+  my $mobile = $q->param('mobilenum'); 
 }
 
 #################################################################
@@ -362,9 +371,6 @@ sub connectCDS
 ####################### MAIN PROGRAM FLOW #######################
 #################################################################
 
-### NOTE: backslash "\" before array "@" REQ_ARG means that it is
-### passed into a subroutine as a reference
-###
 ### Main state machine, based on the request type "action" or "token"
 ### calls appropriate subroutines as described in the
 ### "URI REQUEST AND WEB API" document
@@ -386,13 +392,13 @@ if ($action ne "") {
       case "7"      {&addTrack()}
       case "8"      {&broadcast()}
       case "9"      {&deleteTrack()}
-      else          {print "Error invalid action"}
+      else          {print "!\n"}
     }
   }  
 elsif ($token ne "") {
     &streamTrack();
 }
 else {
-      print "invalid request";
+      print "!\n";
 }  
 
