@@ -12,7 +12,9 @@
 #include <unistd.h>
 #include <libusb.h>
 
-class KeypadDevice {
+#include <InputDevice.h>
+
+class KeypadDevice : public InputDevice {
 public:
 	KeypadDevice();
 	~KeypadDevice();
@@ -26,7 +28,7 @@ public:
 	char getKeyPressed(void);
 
 
-	void update(int column);
+	void update();
 
 	bool isConnected() { return (handle != NULL); }
 
@@ -52,6 +54,9 @@ private:
 
 	//Sets up port directions and resets device
 	void configureDevice(void);
+
+	void update(int column);
+
 };
 
 

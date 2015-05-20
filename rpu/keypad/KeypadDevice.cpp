@@ -44,7 +44,6 @@ KeypadDevice::KeypadDevice()
 		}
 	}
 	else {
-		printf("No devices found\n");
 		handle = NULL;
 	}
 
@@ -168,14 +167,12 @@ char KeypadDevice::sendCommand(std::string cmd)
 	unsigned char temp[2]; //Stores characters from read data
 
 	if(cmd.length() > max) {
-		fprintf(stderr, "Command too long\n");
 		return -1;
 	}
 
 	result = libusb_bulk_transfer(handle, 1, (unsigned char *) cmd.c_str(), cmd.length(), &length, 0);
 
 	if(result != 0 || length != cmd.length()) {
-		printf("Problem!\n");
 		//error();
 		return -1;
 	}
@@ -206,7 +203,29 @@ char KeypadDevice::getKeyPressed()
 {
 	char temp = keyPressed;
 	keyPressed = 0;
+	if(temp >= '0' and temp <= '9') {
+	  if(sevenSegData.length() == 4) {
+	    sevenSegData.erase(0, sevenSegData.length()-4);
+	  }
+	  sevenSegData += temp;
+	}
+	/*else if(temp == 'c') {
+	  sevenSegData = "";
+	}
+	else if(temp == 'q') {
+	  sevenSegData = "";
+	  }*/
+	set7Seg(sevenSegData);
 	return temp;
+}
+
+void KeypadDevice::update()
+{
+	static int col = 0;
+	update(col);
+	col += 1;
+	if (col >= 4)
+		col = 0;
 }
 
 //Refresh 7 segs and scan keypad
@@ -274,7 +293,6 @@ void KeypadDevice::configureDevice()
 
 	result = libusb_reset_device(handle);
 	if (result < 0) {
-		fprintf(stderr, "Unable to reset device\n");
 		return;
 	}
 

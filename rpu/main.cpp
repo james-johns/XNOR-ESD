@@ -5,9 +5,10 @@
 #include <queue>
 #include <sys/select.h>
 
-#include <gst/gst.h>
+
 #include <pthread.h>
 #include <curl/curl.h>
+#include <curses.h>
 
 #include <KeypadDevice.h>
 #include <AudioPlayer.h>
@@ -15,7 +16,7 @@
 #include <RPU.h>
 
 // initialise Gstreamer library
-void initGST(int *argc, char ***argv)
+/*void initGST(int *argc, char ***argv)
 {
 	const gchar *nano_str;
 	guint major, minor, micro, nano;
@@ -30,17 +31,13 @@ void initGST(int *argc, char ***argv)
 	else
 		nano_str = "";
 
-	printf ("This program is linked against GStreamer %d.%d.%d %s\n",
-		major, minor, micro, nano_str);
-
-}
+		}*/
 
 // Thread for handling audio content
 void *audioThreadEntry(void *arg)
 {
 	AudioPlayer *player = (AudioPlayer *)arg;
 	player->run();
-	std::cout << "Returning from audioThreadEntry" << std::endl;
 	return NULL;
 }
 
@@ -49,55 +46,43 @@ void *ioThreadEntry(void *arg)
 {
 	char *c;
 	RPU *prog = (RPU *)arg;
-	KeypadDevice *keypad = prog->getKeypadDevice();
-	if (keypad->isConnected()) {
+	InputDevice *input = prog->getInputDevice();
+	Display * display = prog->getDisplay();
+	if (input == NULL || !input->isConnected()) {
+		prog->sendEvent(new Event(Event::QUIT, NULL)); // send event to quit application
+	} else if (display == NULL) {
+		fprintf(stderr, "No display device");
+	} else {
 		do {
 			for (int i = 0; i < 4; i++) {
-				keypad->update(i);
+				input->update();
 				c = new char;
-				*c = keypad->getKeyPressed();
+				*c = input->getKeyPressed();
 				if (*c == '\n')
 					delete c;
 				else if (*c)
-					prog->sendEvent(new Event(KEYPAD_INPUT, c));
+					prog->sendEvent(new Event(Event::KEYPAD_INPUT, c));
 				else
 					delete c;
-		}
-		} while (prog->isRunning());
-	} else {
-
-		fd_set fds;
-		struct timeval tv;
-		do {
-			tv.tv_sec = 0;
-			tv.tv_usec = 0;
-			FD_ZERO(&fds);
-			FD_SET(fileno(stdin), &fds);
-
-			if (select(1, &fds, NULL, NULL, &tv) > 0) {
-				c = new char;
-				scanf("%c", c);
-
-				if (*c == '\n') {
-					delete c;
-				} else {
-					printf("Input: %c\n", *c);
-					prog->sendEvent(new Event(KEYPAD_INPUT, c));
-				}
-			} else {
-				usleep(100);
 			}
+			display->refresh();
 		} while (prog->isRunning());
 	}
-	//	prog->sendEvent(new Event(QUIT, NULL)); // send event to quit application
 
 	return NULL;
 }
 
+
+/**
+ * @fn main(int argc, char **argv)
+ * @author James Johns
+ *
+ *
+ */
 int main(int argc, char **argv)
 {
 	/* Initialise required libraries */
-	initGST(&argc, &argv);
+	//initGST(&argc, &argv);
 	libusb_init(NULL);
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 
@@ -115,8 +100,8 @@ int main(int argc, char **argv)
 
 	curl_global_cleanup();
 	libusb_exit(NULL);
-	gst_deinit();
-
+	//gst_deinit();
+	endwin();
 	return 0;
 }
 

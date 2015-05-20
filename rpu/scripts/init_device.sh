@@ -1,23 +1,20 @@
 #!/bin/sh
 
-IPADDR=" "
-menuInput=" " 
-INITIAL="0"
 
 # Specify Device
 export DEVICE=wlan0
 
 # Specify SSID and Channel
 export SSID1=NETGEAR
-export SSID2=NETGEAR2
-export SSID3=NETGEAR3
-export CHANNEL=6
+#export SSID2=NOTGEAR
+#export SSID3=LANGEAR
+
+export CHANNEL1=6
+#export CHANNEL2=6
+#export CHANNEL3=6
 
 #Specify CDD Address
 export CDDIP=8.8.8.8
-
-CRON= "1 * * * * /root/home/init_device.sh"
-#cat < ( crontab -l) |grep -v "${CRON}" < ( echo "${CRON}")
 
 modprobe snd-soc-igep0020
 modprobe snd-soc-omap
@@ -27,20 +24,16 @@ amixer set -D hw:0 'Headset' 0dB echo "\n"
 amixer set -D hw:0 'HeadsetL Mixer AudioL2' on echo "\n"
 amixer set -D hw:0 'HeadsetR Mixer AudioR2' on echo "\n"
 
+# Enable wifi-adapter
+ifconfig $DEVICE up
 
 
 while true; do 
+		
 	
-	ping -q -c5 $CDDIP > /dev/null
- 
-	if [ $? -eq 0 ]
-		then
-		echo "Connection to $CDDIP succesfull "
-
-	
-		IPADDR="$( ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}' )"	
-		echo "Selected IP address:$IPADDR"
-		break
+	#	IPADDR="$( ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}' )"	
+	#	echo "Selected IP address:$IPADDR"
+		
 
 		#read -p "Do you want to run Gstreamer  (y/n)?" menuInput 
 
@@ -51,25 +44,52 @@ while true; do
 					
 		#fi
 	
-	else
-		echo "Cannot connect no connection available"	
-		# Enable wifi-adapter
-		ifconfig $DEVICE up
+	ping -q -c2 $CDDIP > /dev/null 
+	if [ $? -eq 1 ]; then
+		ifconfig wlan0 up;
+		echo "connecting with $SSID1 on channel $CHANNEL1"
 		# Associate with AP
-		iwconfig $DEVICE essid $SSID1 channel $CHANNEL
-
-		if [ $? -eq 0 ]
-		then
-			iwconfig $DEVICE essid $SSID2 channel $CHANNEL	
-		else
-			iwconfig $DEVICE essid $SSID3 channel $CHANNEL	
+		if  iwconfig $DEVICE essid $SSID1 channel $CHANNEL1; then 
+			udhcpc -i $DEVICE
+			echo "Connection to $SSID1 succesfull "
 		fi
-	
-		# Obtain IP address
-		ifconfig wlan0 | grep "inet " | awk -F'[: ]+' '{ print $4 }'	
+	fi	
+			
+#	ping -q -c2 $CDDIP > /dev/null  
+#	if [ $? -eq 1 ]; then
+#		ifconfig wlan0 up;
+#		echo "connecting with $SSID2 on channel $CHANNEL2"
+#		# Associate with AP			
+#		if  iwconfig $DEVICE essid $SSID2 channel $CHANNEL2; then
+#			udhcpc -i $DEVICE
+#			echo "Connection to $SSID2 succesfull "
+#		fi
+#	fi
+			
+#	ping -q -c2 $CDDIP > /dev/null  
+#	if [ $? -eq 1 ]; then
+#		ifconfig wlan0 up;
+#		echo "connecting with $SSID3 on channel $CHANNEL3"
+#		# Associate with AP
+#		if  iwconfig $DEVICE essid $SSID3 channel $CHANNEL3; then
+#			udhcpc -i $DEVICE
+#			echo "Connection to $SSID3 succesfull "
+#		fi
+#	fi
+			
+	ping -q -c2 $CDDIP > /dev/null  
+	if [ $? -eq 1 ]; then
+		echo "No networks detected"
 
-	fi		
-
+	else
+	# Obtain IP address
+	echo "Selected IP address:"		
+	ifconfig wlan0 | grep "inet " | awk -F'[: ]+' '{ print $4 }'	
+	echo "Connected to Router with MAC Address:"	
+	iwlist wlan0 scan | awk '/Address:/ {print $5}'	
+	fi
+							
+	sleep 1
 done
    
 
