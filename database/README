@@ -1,0 +1,16 @@
+For information how to connect to database please refer to:
+http://www.cems.uwe.ac.uk/~cjwallac/sql/mysql/
+
+You can create the database via PHPMYADMIN on UWE:
+http://stocks.cems.uwe.ac.uk/phpmyadmin/
+
+Username is: fet<your student id>
+password is: <whatever you have chosen>
+
+To change the password, or create an accaunt:
+https://www.cems.uwe.ac.uk/supportweb/public/studentDbAccManager.php
+
+Importing SQL dump is straight forward, just clock on import (in PHPMYADMIN), and choose
+an SQL dump file (*.sql).
+
+Alternatively, you can ask me for my credentials (not leaving them here anymore ;) ).
