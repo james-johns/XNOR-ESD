@@ -314,9 +314,8 @@ sub getTrackPath
 ### if it does. Else prints an error message.
 sub stream_audio_track
 {
-    my $file      = @_[0];
-    my $target_ip = @_[1];
-    my $id = $target_ip;
+    my $file  = @_[0];
+    my $id    = @_[1];
 
     debugPrint "RPU ID = $id\n";
 
@@ -326,7 +325,6 @@ sub stream_audio_track
 	$tel->waitfor('/password: ?$/i');
 	$tel->print("videolan");
 	
-	$tel->cmd("control $id stop");
 	$tel->cmd("del $id"); 
 	$tel->cmd("new $id vod enabled");
 	$tel->cmd("setup $id input $file");
@@ -343,12 +341,10 @@ sub stream_audio_track
 ### broadcast();
 sub broadcast
 {
-    my $file = "$audio_base_path/111111.ogg";
+    my $file = "$audio_base_path/broadcast.ogg";
     my $id = "broadcast";
 
     stream_audio_track($file, $id);
-
-    
 }
 
 #################################################################
