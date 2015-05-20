@@ -102,37 +102,38 @@ RPU::~RPU()
  */
 void RPU::tick()
 {
-  //Checks for incoming broadcast. Mutes regular streaming
-  //Returns bool; true if broadcasting, false if not 
-  player->listen(); 
+	//Checks for incoming broadcast. Mutes regular streaming
+	//Returns bool; true if broadcasting, false if not 
+	player->listen(); 
 
-	Event *evt;
-	while ((evt = getEvent()) != NULL) {
-		switch (evt->getType()) {
-		case Event::QUIT:
-			running = false;
+	Event *evt = getEvent();
+	do {
+		if (evt != NULL) {
+			if (evt->getType() == Event::QUIT) {
+				running = false;
+			}
+		}
+		switch (state) {
+		case LOGIN_PROMPT:
+			loginPrompt(evt);
+			break;
+		case DISPLAY_MENU:
+			displayMenu(evt);
+			break;
+		case SELECT_LANGUAGE:
+			selectLanguage(evt);
+			break;
+		case SELECT_KNOWLEDGE:
+			selectKnowledge(evt);
 			break;
 		default:
-			switch (state) {
-			case LOGIN_PROMPT:
-				loginPrompt(evt);
-				break;
-			case DISPLAY_MENU:
-				displayMenu(evt);
-				break;
-			case SELECT_LANGUAGE:
-				selectLanguage(evt);
-				break;
-			case SELECT_KNOWLEDGE:
-				selectKnowledge(evt);
-				break;
-			default:
-				break;
-			}
 			break;
 		}
-		delete evt;
-	}
+		
+		if (evt != NULL)
+			delete evt;
+		evt = getEvent();
+	} while (evt != NULL);
 }
 
 /*! RPU::sendEvent(Event *evt)
@@ -197,7 +198,16 @@ std::vector<char *> *RPU::getIPAddress()
 
 void RPU::loginPrompt(Event *evt)
 {
-	display->setErrorString("Please enter PIN to unlock");
+	static bool entered = false;
+
+	if (entered == false) {
+		display->setErrorString("Please enter PIN to unlock");
+		entered = true;
+	}
+
+	if (evt == NULL)
+		return;
+
 	switch (evt->getType()) {
 	case Event::KEYPAD_INPUT:
 		switch (*(char *)evt->getArguments()) {
@@ -211,6 +221,7 @@ void RPU::loginPrompt(Event *evt)
 		  state = DISPLAY_MENU;
 				display->setMenuString(mainMenu->getCurrentMenuItem());
 				display->setErrorString(NULL);
+				entered = false;
 			} else {
 				display->setErrorString(cddapi->getLastSentMessage().c_str());
 			}
@@ -238,6 +249,16 @@ void RPU::loginPrompt(Event *evt)
 
 void RPU::displayMenu(Event *evt)
 {
+	static bool entered = false;
+
+	if (entered == false) {
+		display->setMenuString(mainMenu->getCurrentMenuItem());
+		entered = true;
+	}
+
+	if (evt == NULL)
+		return;
+	
 	switch (evt->getType()) {
 	case Event::KEYPAD_INPUT:
 		switch (*(char *)evt->getArguments()) {
@@ -274,9 +295,17 @@ void RPU::displayMenu(Event *evt)
 			break;
 		case 'c':/*!< Enter (continue) key */
 			/* Enter selected menu entry */
-			display->setErrorString(numberInput.c_str());
-			cddapi->requestAudioStream(numberInput.c_str());
-			player->play();
+			if (mainMenu->getCurrentSelected() == 0) {
+				display->setErrorString(numberInput.c_str());
+				cddapi->requestAudioStream(numberInput.c_str());
+				player->play();
+			} else if (mainMenu->getCurrentSelected() == 1) {
+				state = SELECT_LANGUAGE;
+				entered = false;
+			} else if (mainMenu->getCurrentSelected() == 2) {
+				state = SELECT_KNOWLEDGE;
+				entered = false;
+			}
 			break;
 		case '1' ... '9':
 			numberInput.push_back(*(char *)evt->getArguments());
@@ -294,6 +323,27 @@ void RPU::displayMenu(Event *evt)
 
 void RPU::selectLanguage(Event *evt)
 {
+	static bool entered = false;
+	static int language = 0;
+	char *langString;
+	int tmpLang = language;
+	std::vector<std::string> supportedLanguages = cddapi->getSupportedLanguages();
+
+	if (entered == false) {
+		do {
+			language++;
+			langString = (char *) supportedLanguages[language].c_str();
+		} while (langString == NULL && language < supportedLanguages.size());
+		if (language >= supportedLanguages.size())
+			language = tmpLang;
+		display->setMenuString(supportedLanguages[language].c_str());
+		entered = true;
+	}
+
+	if (evt == NULL)
+		return;
+	
+
 	switch (evt->getType()) {
 	case Event::KEYPAD_INPUT:
 		switch (*(char *)evt->getArguments()) {
@@ -315,17 +365,30 @@ void RPU::selectLanguage(Event *evt)
 			break;
 		case 'q':
 			state = DISPLAY_MENU;
+			entered = false;
 			break;
 		case 'w':/*!< Up key */
-			mainMenu->up();
-			display->setMenuString((char *) mainMenu->getCurrentMenuItem());
+			do {
+				language++;
+				langString = (char *) supportedLanguages[language].c_str();
+			} while (langString == NULL && language < supportedLanguages.size());
+			if (language >= supportedLanguages.size())
+				language = tmpLang;
+			display->setMenuString(supportedLanguages[language].c_str());
 			break;
 		case 's':/*!< Down key */
-			mainMenu->down();
-			display->setMenuString((char *) mainMenu->getCurrentMenuItem());
+			do {
+				language--;
+				langString = (char *) supportedLanguages[language].c_str();
+			} while (langString == NULL && language > 0);
+			if (language < 0)
+				language = tmpLang;
+			display->setMenuString(supportedLanguages[language].c_str());
 			break;
-		case 'c':/*!< Cancel key */
-			/* leave menu */
+		case 'c':/*!< Enter key */
+			cddapi->changeLanguage(language);
+			state = DISPLAY_MENU;
+			entered = false;
 			break;
 		case '1' ... '9':
 		default:
@@ -338,7 +401,28 @@ void RPU::selectLanguage(Event *evt)
 }
 
 void RPU::selectKnowledge(Event *evt)
-{
+{	
+	static bool entered = false;
+	static int knowledge = 0;
+	char *knowString;
+	int tmpKnow = knowledge;
+	std::vector<std::string> supportedKnowledgeLevels = cddapi->getSupportedKnowledgeLevels();
+
+	if (entered == false) {
+		do {
+			knowledge++;
+			knowString = (char *) supportedKnowledgeLevels[knowledge].c_str();
+		} while (knowString == NULL && knowledge < supportedKnowledgeLevels.size());
+		if (knowledge >= supportedKnowledgeLevels.size())
+			knowledge = tmpKnow;
+		display->setMenuString(supportedKnowledgeLevels[knowledge].c_str());
+		entered = true;
+	}
+
+	if (evt == NULL)
+		return;
+	
+
 	switch (evt->getType()) {
 	case Event::KEYPAD_INPUT:
 		switch (*(char *)evt->getArguments()) {
@@ -360,17 +444,30 @@ void RPU::selectKnowledge(Event *evt)
 			break;
 		case 'q':
 			state = DISPLAY_MENU;
+			entered = false;
 			break;
 		case 'c':/*!< Enter key */
-			/* TODO: select language and return to menu */
+			cddapi->changeKnowledgeLevel(knowledge);
+			state = DISPLAY_MENU;
+			entered = false;
 			break;
 		case 'w':/*!< Up key */
-			mainMenu->up();
-			display->setMenuString((char *) mainMenu->getCurrentMenuItem());
+			do {
+				knowledge++;
+				knowString = (char *) supportedKnowledgeLevels[knowledge].c_str();
+			} while (knowString == NULL && knowledge < supportedKnowledgeLevels.size());
+			if (knowledge >= supportedKnowledgeLevels.size())
+				knowledge = tmpKnow;
+			display->setMenuString(supportedKnowledgeLevels[knowledge].c_str());
 			break;
 		case 's':/*!< Down key */
-			mainMenu->down();
-			display->setMenuString((char *) mainMenu->getCurrentMenuItem());
+			do {
+				knowledge--;
+				knowString = (char *) supportedKnowledgeLevels[knowledge].c_str();
+			} while (knowString == NULL && knowledge >= 0);
+			if (knowledge < 0)
+				knowledge = tmpKnow;
+			display->setMenuString(supportedKnowledgeLevels[knowledge].c_str());
 			break;
 		case '1' ... '9':
 		default:

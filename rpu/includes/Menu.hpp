@@ -12,6 +12,7 @@ public:
 	void down();
 
 	const char *getCurrentMenuItem();
+	signed int getCurrentSelected() { return curIndex; }
 
 	const char *getMenuItem(unsigned int index);
 	void addMenuItem(const char *str);
