@@ -13,7 +13,8 @@ int main()
 
   while(1) 
     {
-      printf("%d\n", player->isPlaying());
+      printf("Stream: %d\n", player->isPlaying());
+      printf("Broadcast: %d\n", player->listen());
       sleep(1);
     }
 

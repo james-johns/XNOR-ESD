@@ -24,8 +24,7 @@ public:
 	virtual void rewind() = 0;
 	virtual void fastForward() = 0;
 	virtual void playpause() = 0; // trigger play when paused, pause when paying
-
-
+	virtual bool listen() = 0; //Listens for incoming broadcast
 	virtual void run() = 0;
 	virtual void stop() = 0;
 

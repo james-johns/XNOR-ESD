@@ -59,7 +59,7 @@ void VLCAudioPlayer::run()
 
 }
 
-bool VLCAudioPlayer::isBroadcastActive()
+bool VLCAudioPlayer::listen()
 {
   if(libvlc_media_player_is_playing(vlc_bc)) {
     pause(); //Stop regular streaming

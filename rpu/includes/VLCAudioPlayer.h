@@ -28,7 +28,7 @@ public:
 	void fastForward();
 	void playpause(); // trigger play when paused, pause when paying
 
-	bool isBroadcastActive();
+	bool listen(); //Listens for incoming broadcast
 
 	void run();
 	void stop();
