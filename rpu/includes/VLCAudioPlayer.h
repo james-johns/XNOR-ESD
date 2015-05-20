@@ -28,15 +28,18 @@ public:
 	void fastForward();
 	void playpause(); // trigger play when paused, pause when paying
 
+	bool isBroadcastActive();
 
 	void run();
 	void stop();
 
 private:
 	libvlc_instance_t *vlc;
-	libvlc_media_player_t *vlc_mp;
+	libvlc_media_player_t *vlc_str;
+	libvlc_media_player_t *vlc_bc;
 	libvlc_media_t *vlc_m;
-	
+
+	std::string url;
 };
 
 #endif

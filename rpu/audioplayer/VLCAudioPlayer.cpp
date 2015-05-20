@@ -19,14 +19,17 @@ VLCAudioPlayer::VLCAudioPlayer(const char *ipaddr) : AudioPlayer(ipaddr)
 {
   vlc = libvlc_new(0, NULL); //Create VLC instance
 
-  std::string url = "rtsp://";
+  url = "rtsp://";
   url += "127.0.0.1";
   url += ":5540/";
-  url += ipaddr;
+  //url += ipaddr;
   
-  vlc_m = libvlc_media_new_location(vlc, url.c_str());
-  vlc_mp = libvlc_media_player_new_from_media(vlc_m);
-  
+  vlc_m = libvlc_media_new_location(vlc, (url+"broadcast").c_str());
+  vlc_bc = libvlc_media_player_new_from_media(vlc_m);  
+  libvlc_media_release(vlc_m);
+
+  vlc_m = libvlc_media_new_location(vlc, (url+ipaddr).c_str());
+  vlc_str = libvlc_media_player_new_from_media(vlc_m);
   libvlc_media_release(vlc_m);
 }
 
@@ -38,8 +41,10 @@ VLCAudioPlayer::VLCAudioPlayer(const char *ipaddr) : AudioPlayer(ipaddr)
  */
 VLCAudioPlayer::~VLCAudioPlayer()
 {
-  libvlc_media_player_stop(vlc_mp);
-  libvlc_media_player_release(vlc_mp);
+  libvlc_media_player_stop(vlc_str);
+  libvlc_media_player_release(vlc_str);
+  libvlc_media_player_stop(vlc_bc);
+  libvlc_media_player_release(vlc_bc);
   libvlc_release(vlc);	
 }
 
@@ -54,6 +59,20 @@ void VLCAudioPlayer::run()
 
 }
 
+bool VLCAudioPlayer::isBroadcastActive()
+{
+  if(libvlc_media_player_is_playing(vlc_bc)) {
+    pause(); //Stop regular streaming
+    return true;
+  }
+  else { //Try to connect
+    play(); //Continue regular streaming
+    vlc_m = libvlc_media_new_location(vlc, (url+"broadcast").c_str());
+    vlc_bc = libvlc_media_player_new_from_media(vlc_m);  
+    libvlc_media_release(vlc_m);
+    libvlc_media_player_play(vlc_bc);
+  }
+}
 
 /*! VLCAudioPlayer::stop()
  * @author Rob Shepherd
@@ -63,7 +82,7 @@ void VLCAudioPlayer::run()
  */
 void VLCAudioPlayer::stop()
 {
-  libvlc_media_player_stop(vlc_mp);
+  libvlc_media_player_stop(vlc_str);
 }
 
 /*! VLCAudioPlayer::pause()
@@ -74,7 +93,9 @@ void VLCAudioPlayer::stop()
  */
 void VLCAudioPlayer::pause()
 {
-  libvlc_media_player_pause(vlc_mp);
+  if(isPlaying()) {
+    libvlc_media_player_pause(vlc_str);
+  }
 }
 
 /*! VLCAudioPlayer::play()
@@ -85,7 +106,7 @@ void VLCAudioPlayer::pause()
  */
 void VLCAudioPlayer::play()
 {
-  libvlc_media_player_play(vlc_mp);
+  libvlc_media_player_play(vlc_str);
 }
 
 /*! VLCAudioPlayer::playpause()
@@ -95,7 +116,7 @@ void VLCAudioPlayer::play()
  */
 void VLCAudioPlayer::playpause()
 {
-  libvlc_media_player_pause(vlc_mp); //VLC function already toggles pause
+  libvlc_media_player_pause(vlc_str); //VLC function already toggles pause
 }
 
 /*! VLCAudioPlayer::isPlaying()
@@ -105,7 +126,7 @@ void VLCAudioPlayer::playpause()
  */
 bool VLCAudioPlayer::isPlaying()
 {
-  return libvlc_media_player_is_playing(vlc_mp);
+  return libvlc_media_player_is_playing(vlc_str);
 }
 
 /*! VLCAudioPlayer::rewind()
@@ -116,7 +137,7 @@ bool VLCAudioPlayer::isPlaying()
  */
 void VLCAudioPlayer::rewind()
 {
-  libvlc_time_t currentTime = libvlc_media_player_get_time(vlc_mp); //Time in ms
+  libvlc_time_t currentTime = libvlc_media_player_get_time(vlc_str); //Time in ms
   libvlc_time_t targetTime;
 
   if(currentTime < 5000)
@@ -124,15 +145,15 @@ void VLCAudioPlayer::rewind()
   else
     targetTime = currentTime - 5000;
     
-  libvlc_media_player_set_time(vlc_mp, targetTime);
+  libvlc_media_player_set_time(vlc_str, targetTime);
 }
 
 void VLCAudioPlayer::fastForward()
 {
-  libvlc_time_t currentTime = libvlc_media_player_get_time(vlc_mp);
+  libvlc_time_t currentTime = libvlc_media_player_get_time(vlc_str);
   libvlc_time_t targetTime;
 
   targetTime = currentTime + 5000;
 
-  libvlc_media_player_set_time(vlc_mp, targetTime);
+  libvlc_media_player_set_time(vlc_str, targetTime);
 }
