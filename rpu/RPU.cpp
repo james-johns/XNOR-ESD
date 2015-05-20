@@ -216,9 +216,8 @@ void RPU::loginPrompt(Event *evt)
 			break;
 		case 'c':/*!< Enter key */
 			/* enter selected menu entry */
-			//if (cddapi->login(numberInput.c_str()) == 0) {
-		  if(1) {
-		  state = DISPLAY_MENU;
+			if (cddapi->login(numberInput.c_str()) == 0) {
+				state = DISPLAY_MENU;
 				display->setMenuString(mainMenu->getCurrentMenuItem());
 				display->setErrorString(NULL);
 				entered = false;
