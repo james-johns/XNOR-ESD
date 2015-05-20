@@ -227,6 +227,7 @@ void RPU::loginPrompt(Event *evt)
 			break;
 		case '1' ... '9':
 			/* capture PIN input */
+		        display->setErrorString("Please enter PIN to unlock");
 			numberInput.push_back(*(char *)evt->getArguments());
 			if (numberInput.length() > 4) // pop data from front of string to reduce to 4 character string
 				numberInput.erase(0, numberInput.length() - 4);

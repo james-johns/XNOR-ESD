@@ -23,7 +23,7 @@ VLCAudioPlayer::VLCAudioPlayer(const char *ipaddr) : AudioPlayer(ipaddr)
   counter = 0;
 
   url = "rtsp://";
-  url += "10.0.0.1";
+  url += "10.0.0.2";
   url += ":5540/";
   //url += ipaddr;
   
@@ -63,11 +63,13 @@ void VLCAudioPlayer::run()
 
 bool VLCAudioPlayer::listen()
 {
+  bool val;
+
   if(counter == 500) {
     if(/*libvlc_media_player_will_play(vlc_bc) &&*/ libvlc_media_player_is_playing(vlc_bc)) {
       pause(); //Stop regular streaming
       libvlc_media_player_play(vlc_bc);
-      return true;
+      val = true;
     }
     else if(!libvlc_media_player_will_play(vlc_bc)) { //Try to connect
       play(); //Continue regular streaming
@@ -76,13 +78,15 @@ bool VLCAudioPlayer::listen()
       vlc_bc = libvlc_media_player_new_from_media(vlc_m);  
       libvlc_media_release(vlc_m);
       libvlc_media_player_play(vlc_bc);
-      return false;
+      val = false;
     }
     counter = 0;
   }
   else {
     counter++;
   }
+
+  return val;
 }
 
 /*! VLCAudioPlayer::stop()
